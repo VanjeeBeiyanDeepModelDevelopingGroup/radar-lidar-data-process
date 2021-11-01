@@ -135,7 +135,7 @@ global x_cfd_cor_form4
 %         fprintf("结束!\n");
 %         fprintf("读取修正参数......\n");
         %% 载入修正参数
-        area_t = load('.\lidar\04_detection\rangeMeasure\measureParam\4_area_t.mat');%载入通道4修正系数
+        area_t = load('.\lidar\02_detection\rangeMeasure\measureParam\4_area_t.mat');%载入通道4修正系数
         area_cor_form4=area_t.area_t(1,:);
         x_cfd_cor_form4=area_t.area_t(2,:);
         % load('.\measureParam\5_area_t.mat');%载入通道5修正系数

@@ -424,7 +424,7 @@ set(gca,'YDIR','normal');title('usrr vel-angle map');
 %% ¼ÆËãmrr data cube 3d-fft½á¹û
 tic
 [ dataCube3dFFT_mrr, ~ ] = AOA2_v1_6( dopplerOut_vel1, 1, RX_num, 256, numCirpsPerFrame_vel1, angleBin_num, MAX_VEL_ENH_PROCESSING);
-[RAMap_mrr] = AOA2_v1_7(dopplerOut_vel1, CFAROut_vel, 1, RX_num, 256, numCirpsPerFrame_vel1, angleBin_num, Temp1_accumulate, MAX_VEL_ENH_PROCESSING);
+% [RAMap_mrr] = AOA2_v1_7(dopplerOut_vel1, CFAROut_vel, 1, RX_num, 256, numCirpsPerFrame_vel1, angleBin_num, Temp1_accumulate, MAX_VEL_ENH_PROCESSING);
 [ RAMap_fromMat_cfar_mrr ] = AOA2_v1_9( dopplerOut_vel1, CFAROut_vel, 1, RX_num, 256, numCirpsPerFrame_vel1);
 [ RAMap_fft_mrr, ~ ] = AOA2_v1_10( dopplerOut_vel1, CFAROut_vel, 1, RX_num, 256, angleBin_num, MAX_VEL_ENH_PROCESSING);
 toc
