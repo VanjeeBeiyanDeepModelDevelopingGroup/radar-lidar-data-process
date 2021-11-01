@@ -3,11 +3,11 @@
 
 %%% This script is used to read the binary file produced by the DCA1000
 %%% and Mmwave Studio
-function [cpdata, vel1data, vel2data] = read5DCA1000(fid, numADCSamples, numADCSamples_vel, numChirps_cp, numChirps_vel1, numChirps_vel2, RX_num, TX_num, frame_num)
+function [cpdata, vel1data, vel2data] = read5DCA1000(fileName, numADCSamples, numADCSamples_vel, numChirps_cp, numChirps_vel1, numChirps_vel2, RX_num, TX_num, frame_num)
 %% read file
 % read .bin file
 
-% fid = fopen(fileName,'r');
+fid = fopen(fileName,'r');
 adcData = fread(fid, 'int16');
 fclose(fid);
 fileSize = size(adcData, 1);

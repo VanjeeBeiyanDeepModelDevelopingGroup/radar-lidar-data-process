@@ -16,17 +16,17 @@
 %%%     修改部分： 去除多帧循环运算，仅对选定帧进行单帧运算                                      %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [ azimuthOut, elevOut ] = AOA2_v1_3( dopplerOut, CFAROut, TX_num, RX_num, dopplerBin_num, angleBin_num, MAX_VEL_ENH_PROCESSING)
+function [ azimuthOut_music, elevOut ] = AOA2_v1_3( dopplerOut, CFAROut, TX_num, RX_num, dopplerBin_num, angleBin_num, MAX_VEL_ENH_PROCESSING)
     if isempty(CFAROut)
         azimuthOut = [];
         elevOut = [];
         return;
     end
+    L = 360;
     azimuthOut = zeros(length(CFAROut(:, 1)), angleBin_num);
+    azimuthOut_music = zeros(length(CFAROut(:, 1)), L);
     elevOut = zeros(length(CFAROut(:, 1)), angleBin_num);
-         
      for m = 1: length(CFAROut(:, 1))
-
          if TX_num == 3
 
              Temp1 = zeros(1, angleBin_num);
@@ -37,20 +37,9 @@ function [ azimuthOut, elevOut ] = AOA2_v1_3( dopplerOut, CFAROut, TX_num, RX_nu
              Temp3 = dopplerCompensation(Temp3, CFAROut(m, 2), TX_num, RX_num, dopplerBin_num, MAX_VEL_ENH_PROCESSING);
              Temp1(1: ((TX_num - 1) * RX_num)) = Temp3(1: ((TX_num - 1) * RX_num));
              Temp2(1: RX_num) = Temp3((((TX_num - 1) * RX_num) + 1): (TX_num * RX_num));
-%              save Temp1_.mat Temp1
              azimuthOut(m,:) = fftshift(fft(Temp1));
+             azimuthOut_music(m,:) = musicAlg(Temp3(1: ((TX_num - 1) * RX_num))',L);
              elevOut(m,:) = fftshift(fft(Temp2));
-% %% music 算法
-% %              [P1,f1] = pmusic(Temp1,30,64,4); % input,p,nfft,fs,nwin,overlap
-%              [P1,f1] = pmusic(Temp1,[Inf,1.1],64,64,3); % Window length = 7
-%              azimuthOut(m, :) = P1;
-% %              [P2,f2] = pmusic(Temp2,30,64,4); % input,p,nfft,fs,nwin,overlap
-%              [P2,f2] = pmusic(Temp1,[Inf,1.1],64,64,3); % Window length = 7
-%              elevOut(m, :) = P2;
-%              figure(5);
-%              subplot(2,2,1);plot(20*log10(abs(azimuthFFTResult)));
-%              subplot(2,2,3);plot(f1,P1);legend('fft','music');title('usrr_信号子空间维度为30/64');
-%              a=1;
          else
 
              Temp1 = zeros(1, angleBin_num);
@@ -59,14 +48,7 @@ function [ azimuthOut, elevOut ] = AOA2_v1_3( dopplerOut, CFAROut, TX_num, RX_nu
              Temp1 = dopplerCompensation(Temp1, CFAROut(m, 2), TX_num, RX_num, dopplerBin_num, MAX_VEL_ENH_PROCESSING);
 
              azimuthOut(m,:) = fftshift(fft(Temp1));
-% %% music 算法
-% %              [P1,f1] = pmusic(Temp1,15,64,4); % input,p,nfft,fs,nwin,overlap
-%              [P1,f1] = pmusic(Temp1,[Inf,1.1],64,64,3); % Window length = 7
-% 
-%              azimuthOut(m, :) = P1;
-%              subplot(2,2,2);plot(20*log10(abs(azimuthFFTResult)));
-%              subplot(2,2,4);plot(f1,P1);legend('fft','music');title('mrr_信号子空间维度为4/64');
-%              a=1;
+             azimuthOut_music(m,:) = musicAlg(Temp1(1: (TX_num * RX_num))',L);
          end
 
      end

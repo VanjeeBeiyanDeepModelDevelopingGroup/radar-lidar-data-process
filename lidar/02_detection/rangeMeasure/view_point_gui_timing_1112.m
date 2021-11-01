@@ -1,6 +1,9 @@
 function [t_data,area_data,wide_data]=view_point_gui_timing_1112(data,zeropoint,area_cor_form,x_cfd_cor_form,t_offset)
-%% 修改阈值控制输出点
-thresh = 5;
+% 上一帧的数据对应下一帧角度
+
+% load(['F:\测试\',filename,'.mat']);
+% a=double(a);
+
 s=size(data,2);
 t_data=zeros(s,1);
 wide_data=zeros(s,1);
@@ -9,7 +12,6 @@ area_data=zeros(s,1);
 % start_x=60;
 
 for j=1:s
-    %% 用CFAR波峰提取替换最值提取
     [max_data,max_index]=max(data(:,j));
     
     % %     t_data(j)=valve_ad_828(data(:,j),70)-58.96-0.386;
@@ -23,7 +25,7 @@ for j=1:s
     %         [max_data,max_index]=max(data(i+2:end,j));  %% i+2为找下一重回波的起始位置
     %         max_index=max_index+i+2-1;
     %     end
-    if max_data>thresh && ~isnan(t_data(j))
+    if max_data>20 && ~isnan(t_data(j))
         try
             [area_data(j),wide_data(j)]=area_amend_904(data(:,j),max_index);
         catch

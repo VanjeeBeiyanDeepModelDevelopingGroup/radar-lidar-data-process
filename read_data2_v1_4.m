@@ -1,12 +1,11 @@
 %%% Created by 李嘉宝 2021.05.06 version 1.2 %%%
-%%% 修改 by 刘明旭 杨炎龙：从读取完整bin文件/.mat文件改为按帧号读取bin文件  2021.09.17 version 1.4 %%%
 
 function read_data2_v1_4
 clear
 close all
 f = figure('Visible','off','Position',[30,50,1180,600]);
-% plot_data = axes('Units','Pixels','Position',[50,300,800,200]);
-% plot_mmwave_data = axes('Units','Pixels','Position',[50,50,800,200]);
+plot_data = axes('Units','Pixels','Position',[50,300,800,200]);
+plot_mmwave_data = axes('Units','Pixels','Position',[50,50,800,200]);
 %  Construct the components.
 hfile = uicontrol('Style','pushbutton','Units','pixels',...
     'String','激光文件','FontSize',12,...
@@ -20,19 +19,15 @@ hfile = uicontrol('Style','pushbutton','Units','pixels',...
 %     'Background','w','HorizontalAlignment','left');
 frameNextPackButton = uicontrol('Style','pushbutton','Units','pixels',...
     'String','next','FontSize',12,...
-    'Position',[180,555,50,30],...
+    'Position',[180,555,40,30],...
     'Callback',@frame_change_next_Callback);
 frameResetButton = uicontrol('Style','pushbutton','Units','pixels',...
     'String','reset','FontSize',12,...
-    'Position',[230,555,50,30],...
-    'Callback',@frame_change_reset_Callback);
-% frameSelcetButton = uicontrol('Style','pushbutton','Units','pixels',...
-%     'String','select','FontSize',12,...
-%     'Position',[280,555,50,30],...
-%     'Callback',@frame_change_select_Callback); 
+    'Position',[230,555,40,30],...
+    'Callback',@frame_change_reset_Callback);    
 mmwavefile = uicontrol('Style','pushbutton','Units','pixels',...
     'String','毫米波文件','FontSize',12,...
-    'Position',[50,515,100,30],...
+    'Position',[50,516,100,30],...
     'Callback',@mmwavefile_Callback);
 frametext = uicontrol(f,'Style','text','Units','pixels',...
     'FontSize',12,'Position',[177,510,130,30],...
@@ -40,22 +35,16 @@ frametext = uicontrol(f,'Style','text','Units','pixels',...
 frameIndex = uicontrol('Style','edit','Units','pixels',...
     'String','','FontSize',12,...
     'Position',[300,515,35,30]);
-
-
-videoFile = uicontrol('Style','pushbutton','Units','pixels',...
-    'String','视频文件','FontSize',12,...
-    'Position',[50,500,100,30],...
-    'Callback',@video_button_Callback);
 % frameNumtext = uicontrol(f,'Style','text','Units','pixels',...
 %     'FontSize',12,'Position',[668,555,200,30],...
 %     'Visible','off','HorizontalAlignment','left');
 framePlotButton = uicontrol('Style','pushbutton','Units','pixels',...
     'String','start','FontSize',12,...
-    'Position',[350,515,40,30],...
+    'Position',[350,516,40,30],...
     'Callback',@frame_change_disp_Callback);
 frameStopButton = uicontrol('Style','pushbutton','Units','pixels',...
     'String','stop','FontSize',12,...
-    'Position',[395,515,40,30],...
+    'Position',[395,516,40,30],...
     'Callback',@frame_change_stop_Callback);  
 modeButtonGroup = uibuttongroup('Visible','on','Units','pixels',...
                   'Position',[500 516 180 40],'Title','Modes',...
@@ -113,7 +102,6 @@ framePlotButton.Units = 'normalized';
 frameStopButton.Units = 'normalized';
 frameNextPackButton.Units = 'normalized';
 frameResetButton.Units = 'normalized';
-% frameSelcetButton.Units = 'normalized';
 finalResultTable.Units = 'normalized';
 modeButtonGroup.Units = 'normalized';
 methodButtonGroup.Units = 'normalized';
@@ -123,7 +111,6 @@ movegui(f,'center')
 f.Visible = 'on';
 global lidar_dir_path
 global radar_dir_path
-global video_dir_path
 global radarDataAll
 global vel1data
 global vel2data
@@ -136,16 +123,19 @@ global frame_num
 global stopFlag
 global area_cor_form4
 global x_cfd_cor_form4
-
-    function video_button_Callback(~,~)
-        %% 读取视频文件路径
-        [video_dir_path] = uigetdir()
-    end
-
     function file_button_Callback(~,~)
-        [lidar_dir_path] = uigetdir()
+        [lidar_dir_path] = uigetdir();
+%         fprintf("开始读激光雷达数据......\n");
+%         filename
+%         data = load([dir_path,filename]);
+%         lidarData = data.data;
+% %         lidarDataFrame = packLidarDataIntoFrames(lidarData); % 角度*距离*帧号
+%         lidarDataFrame = packLidarDataIntoFrames_v02(lidarData); % 角度*距离*帧号
+%         size(lidarDataFrame)
+%         fprintf("结束!\n");
+%         fprintf("读取修正参数......\n");
         %% 载入修正参数
-        area_t = load('./lidar/02_detection/rangeMeasure/measureParam/4_area_t.mat');%载入通道4修正系数
+        area_t = load('.\lidar\04_detection\rangeMeasure\measureParam\4_area_t.mat');%载入通道4修正系数
         area_cor_form4=area_t.area_t(1,:);
         x_cfd_cor_form4=area_t.area_t(2,:);
         % load('.\measureParam\5_area_t.mat');%载入通道5修正系数
@@ -158,7 +148,7 @@ global x_cfd_cor_form4
     end
 
      function mmwavefile_Callback(~,~)         
-         radar_dir_path = uigetdir()
+         radar_dir_path = uigetdir();
      end
 
     function bselection(~,event)
@@ -172,53 +162,47 @@ global x_cfd_cor_form4
     end
 
     function frame_change_disp_Callback(~,~)
-        % 获取文件列表
         lidar_sort_nat_name = dir(lidar_dir_path);
         radar_sort_nat_name = dir(radar_dir_path);
-        % 对文件列表进行排序
         lidar_dir_struct=sort_nat({lidar_sort_nat_name.name});
         radar_dir_struct=sort_nat({radar_sort_nat_name.name});
-        % 取最后一帧的文件号
-        end_frame_dir_lidar = strsplit(lidar_dir_struct{end},'.');
-        end_frame_lidar = str2num(end_frame_dir_lidar{1});
-        end_frame_dir_radar = strsplit(radar_dir_struct{end},'.');
-        end_frame_radar = str2num(end_frame_dir_radar{1});
-        % 获取起始帧号
+        frameNum = length(lidar_dir_struct);
+        timestampShift = 5;
         startFrameNum = str2num(frameIndex.String);
-        % 获取视频文件
-        vid = VideoReader([video_dir_path, '/video.mp4']);
-        if vid == -1
-           fprintf('不存在对应的视频文件！\n');
-           return;
-        end
-        stopFlag = false;
-        for i = startFrameNum:min(end_frame_lidar, end_frame_radar)
-            %% 停止循环
-            if stopFlag
-                fprintf('停止!\n');
-                break;
-            end
-            %% 按帧读取文件
+        for i=startFrameNum+2:frameNum
             fprintf('帧号：%d\n',i);
-            % 获取文件名
-            radar_i = i;% TODO: 这里，LiDAR和Radar数据的帧号未必一致，
-                        % 相互间可能差1，使用时需要注意调整
-            lidar_filename = [lidar_dir_path,'/', num2str(i),'.bin'];
-            radar_filename = [radar_dir_path,'/', num2str(radar_i),'.bin'];
-%             fprintf(lidar_filename);
-%             fprintf(radar_filename);
-
-            %% 读取激光雷达数据
+        %% 获取文件名
+            lidar_filename = [lidar_dir_path,'\', lidar_dir_struct{i}];
+            radar_filename = [radar_dir_path,'\', radar_dir_struct{i}];
+        %% 将帧号对齐
+%             lidarFrameNum = str2num(lidar_dir_struct{i}(1:end-4));
+%             radarFrameNum = str2num(radar_dir_struct{i}(1:end-4));
+%             frameDiff = lidarFrameNum-radarFrameNum;
+%             checkCnt = 0;
+%             if frameDiff~=0
+%                 % 向后(或前)查看timestampShift帧
+%                 for checkCnt = 1:timestampShift
+%                     if frameDiff < 0 && frameDiff > timestampShift
+%                         checkCnt = checkCnt*(-1);
+%                     end
+%                     radarFrameNum_temp = str2num(radar_dir_struct{i+checkCnt}(1:end-4));
+%                     % 找到了完全相同的帧号，就用这个文件
+%                     if lidarFrameNum == radarFrameNum_temp
+%                         radar_filename = [radar_dir_path,'\', radar_dir_struct{i+checkCnt}];
+%                         break
+%                     end
+%                 end
+%                 % 如果轮询完之后没有找到，那么就整个放弃这一帧
+%                 if abs(checkCnt) == timestampShift
+%                     continue
+%                 end
+%             end
+%             disp(['lidar filename: ',lidar_dir_struct{i}]);
+%             disp(['radar filename: ',radar_dir_struct{i+checkCnt}]);
+        %% 读取激光雷达数据
             fid = fopen(lidar_filename);
-            % 读取失败，跳过当前帧
-            if fid == -1
-                fprintf('没有激光雷达文件%d.bin\n',i);
-               continue; 
-            end
-            % 解析激光雷达数据
             lidarData_frame = fread(fid);
             lidarData_mat = zeros(606,300);
-            % TODO: 这里应当在赋值时进行异常帧判断
             for j=1:300
                 lidarData_mat(:,j) = lidarData_frame(1+606*(j-1):606*j);
             end
@@ -230,9 +214,8 @@ global x_cfd_cor_form4
             end
 %             figure(4);imagesc(lidarDataFrame(:,:,1));
             nextCnt = 1;
-            
-            %% 读取毫米波雷达数据
-             % 配置参数
+        %% 读取毫米波数据
+            % 配置参数
             if strcmp(modeButtonGroup.SelectedObject.String, 'urr')
                 numADCSamples = param.numADCSamples;
                 numChirpsPerFrame = param.numChirpsPerFrame;
@@ -276,27 +259,13 @@ global x_cfd_cor_form4
                 size(vel2data)
             elseif strcmp(modeButtonGroup.SelectedObject.String, 'mrr+urr')
 %                 disp('mrr+urr');
-                fid_radar = fopen(radar_filename,'r');
-                if fid_radar == -1
-                    fprintf('没有毫米波雷达文件%d.bin\n',i);
-                    continue;
-                end
-                [radarDataAll, vel1data, vel2data]=read5DCA1000(fid_radar, numADCSamples, numADCSamples_vel, numChirpsPerFrame, numCirpsPerFrame_vel1, numCirpsPerFrame_vel2, RX_num, TX_num, frame_num);  %读取文件
+                [radarDataAll, vel1data, vel2data]=read5DCA1000(radar_filename, numADCSamples, numADCSamples_vel, numChirpsPerFrame, numCirpsPerFrame_vel1, numCirpsPerFrame_vel2, RX_num, TX_num, frame_num);  %读取文件
 %                 [radarDataAll, vel1data, vel2data]=read3DCA1000('1630927957.415791.bin', 512,256,96, 128, 128, 4,3, 1);  %读取文件
 %                 size(radarDataAll)
 %                 size(vel1data)
 %                 size(vel2data)
             end
-            fprintf("第%d帧读取结束!\n", i);
-
-            %% 读取视频
-            frame_index = floor((i - 1) / 2) * 5 + 2 + rem(i, 2);
-            frame = read(vid, frame_index);
-            h5 = figure(5);
-            figureName = 'video';
-            set(h5,'name',figureName,'Numbertitle','off')
-            imshow(frame);
-            
+            fprintf("结束!\n");
             %% 数据处理
             linNum=1;
             if linNum > 1
@@ -341,7 +310,7 @@ global x_cfd_cor_form4
 
                             case 'normal'
                                 methodSign = 4;
-                                [ distanceCoor_vel, velocityCoor1,velocityCoor2,distanceCoor,velocityCoor, distance, velocity, CFAROut, mmwavedata,dopplerSum, dopplerSum1,dopplerSum2,pcStrc ] = mmwaveResults_urrsrrNormal(radarDataAll, vel1data, vel2data,lidarDataFrame_singL, num2str(radar_i),lineId);
+                                [ distanceCoor_vel, velocityCoor1,velocityCoor2,distanceCoor,velocityCoor, distance, velocity, CFAROut, mmwavedata,dopplerSum, dopplerSum1,dopplerSum2,pcStrc ] = mmwaveResults_urrsrrNormal(radarDataAll, vel1data, vel2data,lidarDataFrame_singL, num2str(1),lineId);
                             case 'CRT'
                                 methodSign = 5;
                                 [ distanceCoor, velocityCoor, distance, velocity, mmwavedata, dopplerSum ] = mmwaveResults_CRT(radarDataAll, vel1data, vel2data, num2str(i));
@@ -358,7 +327,9 @@ global x_cfd_cor_form4
 %                                 set(gca,'YDIR','normal');
 %                                 pause(0.05);
                         end
+
                 end
+                
             end
         end
     end
@@ -394,8 +365,4 @@ global x_cfd_cor_form4
         fprintf("重新读第一包\n");
         frame_change_next_Callback();
     end
-%     function frame_change_select_Callback(~,~)
-%         [x,y] = ginput;
-%         fprintf("x: %d y: %d\n",x,y)
-%     end
 end

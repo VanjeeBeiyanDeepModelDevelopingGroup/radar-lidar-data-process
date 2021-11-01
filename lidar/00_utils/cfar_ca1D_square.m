@@ -3,15 +3,10 @@
 % 按照距离减小阈值或者窗口大小，因为回波随距离变远，波峰变小，不好提取
 function [biXcube] = cfar_ca1D_square(Xcube,trainWin,guardLen,Pfa,wrapMode)
 N = trainWin*2;
-% alpha = N*(Pfa^(-1/N)-1);
+alpha = N*(Pfa^(-1/N)-1);
 % alpha_oneside = trainWin*(Pfa^(-1/trainWin)-1);
-% Xcube = Xcube.^2; 
-% minNum = min(Xcube);
-% if min(Xcube)<0
-%     minNum = 0;
-% end
-% Xcube = (Xcube-minNum)/(max(Xcube)-minNum); % min-max normalization
-Xcube = Xcube/max(Xcube); % min-max normalization
+Xcube = Xcube.^2; 
+Xcube = Xcube/max(Xcube); % normalization
 Xlength = length(Xcube);
 biXcube = zeros(1,Xlength);
 Detect = [];

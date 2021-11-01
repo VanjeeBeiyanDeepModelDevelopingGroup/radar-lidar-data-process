@@ -18,7 +18,7 @@ plot(lidarFlow,'DecimationFactor',[5 5],'ScaleFactor',10);
 hold off
 subplot(2,2,2);imagesc(x,y,Vx);set(gca,'YDIR','normal');
 subplot(2,2,3);imagesc(x,y,Vy);set(gca,'YDIR','normal');hold on
-% 画处速度值的大小和位置
+% 画出速度值的大小和位置
 value = min(Vy(:));
 [y0,x0] = find(Vy==value);
 subplot(2,2,3);text(x(x0),y(y0),num2str(value));hold on;plot(x(x0),y(y0),'rp');hold off

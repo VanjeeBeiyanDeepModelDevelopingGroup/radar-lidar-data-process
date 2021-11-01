@@ -11,7 +11,7 @@ lidarData = lidarData(4:end,:)-127;
 [ads,angles] = size(lidarData); % ADnum*angles
 t_offset = 0.4546;
 zeropoint = 2*ones(1,angles);
-[t_data,area_data,wide_data]=view_point_gui_timing_1112(lidarData,zeropoint,area_cor_form4,x_cfd_cor_form4,t_offset);
+[t_data,area_data,wide_data]=view_point_gui_timing_1112_v1(lidarData,zeropoint,area_cor_form4,x_cfd_cor_form4,t_offset);
 
 %% º∆À„ ‰≥ˆµ„‘∆xyz
 allMiuSig = [];

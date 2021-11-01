@@ -122,6 +122,7 @@ global frame_num
 global stopFlag
 global area_cor_form4
 global x_cfd_cor_form4
+
     function file_button_Callback(~,~)
         [filename,dir_path] = uigetfile('.mat','打开文件');
         fprintf("开始读激光雷达数据......\n");
@@ -134,9 +135,10 @@ global x_cfd_cor_form4
         fprintf("结束!\n");
         fprintf("读取修正参数......\n");
         %% 载入修正参数
-        area_t = load('.\lidar\04_detection\rangeMeasure\measureParam\4_area_t.mat');%载入通道4修正系数
+        area_t = load('.\lidar\02_detection\rangeMeasure\measureParam\4_area_t.mat');%载入通道4修正系数
         area_cor_form4=area_t.area_t(1,:);
         x_cfd_cor_form4=area_t.area_t(2,:);
+        fprintf("结束!\n");
         % load('.\measureParam\5_area_t.mat');%载入通道5修正系数
         % area_cor_form5=area_t(1,:);
         % x_cfd_cor_form5=area_t(2,:);
@@ -284,6 +286,7 @@ global x_cfd_cor_form4
         [angle,range,linNum,frame] = size(lidarDataFrame);        
         stopFlag = false;
         frameIdx = str2num(frameIndex.String);
+        Temp1_accumulate = [];
 %         figure(2);
         for i=frameIdx:frame
             if stopFlag==true
@@ -303,7 +306,12 @@ global x_cfd_cor_form4
             else
                 lines = 1;
             end
+            stopFlag = false;
             for lineId = 1:lines
+                if stopFlag
+                    fprintf('停止!\n');
+                    break
+                end
                 lidarDataFrame_singL = squeeze(lidarDataFrame(:,:,lineId,:));
                 lidarData_frame = lidarDataFrame_singL(:,:,this_frameNum); % 取第i帧激光雷达
                 fprintf("这是第%d条线\n",lineId);
@@ -345,7 +353,7 @@ global x_cfd_cor_form4
 
                             case 'normal'
                                 methodSign = 4;
-                                [ distanceCoor_vel, velocityCoor1,velocityCoor2,distanceCoor,velocityCoor, distance, velocity, CFAROut, mmwavedata,dopplerSum, dopplerSum1,dopplerSum2,pcStrc ] = mmwaveResults_urrsrrNormal(radarDataAll, vel1data, vel2data,lidarDataFrame_singL, num2str(i),lineId);
+                                [ distanceCoor_vel, velocityCoor1,velocityCoor2,distanceCoor,velocityCoor, distance, velocity, CFAROut, mmwavedata,dopplerSum, dopplerSum1,dopplerSum2,pcStrc ] = mmwaveResults_urrsrrNormal(radarDataAll, vel1data, vel2data,lidarDataFrame_singL, num2str(i),lineId,Temp1_accumulate);
                             case 'CRT'
                                 methodSign = 5;
                                 [ distanceCoor, velocityCoor, distance, velocity, mmwavedata, dopplerSum ] = mmwaveResults_CRT(radarDataAll, vel1data, vel2data, num2str(i));

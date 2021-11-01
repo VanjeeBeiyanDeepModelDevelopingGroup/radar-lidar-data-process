@@ -1,7 +1,5 @@
 function [area_data,wide_data,max1,x_dif,x_dif2,x_dif3,x_max,wide_data2,area_data2,x_dif4]=area_amend_904(data,max_index)
-thresh = 5;
-%% 最大值太小，太靠后或者太靠前的都不要
-if data(max_index)<thresh || length(data)-max_index<3 || max_index<4
+if data(max_index)<20 || length(data)-max_index<3 || max_index<4
     area_data=NaN;
     wide_data=NaN;
     max1=NaN;
@@ -14,7 +12,6 @@ if data(max_index)<thresh || length(data)-max_index<3 || max_index<4
     area_data2=NaN;
     return
 end
-
 wide1=20;
 for i=max_index:-1:1
     if data(i)<=wide1

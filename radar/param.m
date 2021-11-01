@@ -17,6 +17,8 @@ classdef param
         freqSlopeConst_vel = 4.0;
         
         startFreqConst = 77;
+%         bandwidth = (freqSlopeConst * 1e12 * numADCSamples) / (digOutSampleRate * 1e3);
+%         centerFreq = startFreqConst * 1e9 + bandwidth * 0.5 + adcStartTimeConst * 1e-6 * freqSlopeConst * 1e12;
         startFreqConst_vel = 76;
         adcStartTimeConst = 3;
         idleTimeConst = 20;
@@ -27,19 +29,23 @@ classdef param
         CFARTHRESHOLD_N_BIT_FRAC = 8;
         guardLen_doppler = 2;
         winLen_doppler = 4;
-        thresholdScale_doppler = 0.1;
+        thresholdScale_doppler = 0.3;
+        USRR_enhance = 0.6;
         guardLen_range = 4;
         winLen_range = 8;
-        thresholdScale_range = 0.1;
+        thresholdScale_range = 0.3;
         cfartype = 'so';
-        angleBin_num = 8;
-        
+        angleBin_num = 64;
+        musicBin = 360;
+        musicTimeWindow = 5;
+
         MRR_guardLen_doppler = 6;
         MRR_winLen_doppler = 10;
-        MRR_thresholdScale_doppler = 0.1;
+        MRR_thresholdScale_doppler = 0.8;
+        MRR_enhance = 0.7;
         MRR_guardLen_range = 6;
         MRR_winLen_range = 10;
-        MRR_thresholdScale_range = 0.1;
+        MRR_thresholdScale_range = 0.8;
         
         
         MRR_CHIRP_IDLETIME_1 = 0;

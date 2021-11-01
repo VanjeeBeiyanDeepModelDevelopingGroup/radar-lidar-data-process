@@ -1,6 +1,5 @@
 function [x]=cfd_ad_ys_828(data,max_index,s,y)
-%% 到处都是阈值
-if data(max_index)<=5
+if data(max_index)<=15
     x=NaN;
     return
 end
@@ -47,7 +46,6 @@ end
 %         hold on
 %         plot(x_d,data2)
 %         hold on
-if ~isempty(j)
     if j>=length(data) || data(j)<5
         x=NaN;
     else
@@ -68,7 +66,4 @@ if ~isempty(j)
 %         b2=s_data2(j)-k2*j;
 %         x=-(b1-b2)/(k1-k2)-63.4;
     end
-else
-    x=NaN;
-end
 end

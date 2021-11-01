@@ -1,0 +1,8 @@
+# data file
+data/
+*.bin
+*.txt
+*.mat
+*.png
+*.mp4
+*.drawio
