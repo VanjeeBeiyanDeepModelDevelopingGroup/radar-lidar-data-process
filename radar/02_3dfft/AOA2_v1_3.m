@@ -19,6 +19,7 @@
 function [ azimuthOut_music, elevOut ] = AOA2_v1_3( dopplerOut, CFAROut, TX_num, RX_num, dopplerBin_num, angleBin_num, MAX_VEL_ENH_PROCESSING)
     if isempty(CFAROut)
         azimuthOut = [];
+        azimuthOut_music = [];
         elevOut = [];
         return;
     end

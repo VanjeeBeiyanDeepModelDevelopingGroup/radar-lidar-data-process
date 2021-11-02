@@ -81,7 +81,7 @@ method2 = uicontrol(methodButtonGroup2,'Style','radiobutton',...
                   'String','CRT',...
                   'Position',[10 30 100 15]);
 method3 = uicontrol(methodButtonGroup2,'Style','radiobutton',...
-                  'String','Lidar',...
+                  'String','apply',...
                   'Position',[10 10 70 15]);              
 finalResultTable = uitable(f, 'ColumnName', {'Distance'; 'Velocity'; 'x'; 'y'; 'z'}, 'Position', [880, 50, 275, 500]);
 
@@ -135,7 +135,7 @@ global x_cfd_cor_form4
         fprintf("结束!\n");
         fprintf("读取修正参数......\n");
         %% 载入修正参数
-        area_t = load('.\lidar\02_detection\rangeMeasure\measureParam\4_area_t.mat');%载入通道4修正系数
+        area_t = load('./lidar/02_detection/rangeMeasure/measureParam/4_area_t.mat');%载入通道4修正系数
         area_cor_form4=area_t.area_t(1,:);
         x_cfd_cor_form4=area_t.area_t(2,:);
         fprintf("结束!\n");
@@ -353,22 +353,24 @@ global x_cfd_cor_form4
 
                             case 'normal'
                                 methodSign = 4;
+%                                 [ distanceCoor_vel, velocityCoor1,velocityCoor2,distanceCoor,velocityCoor, distance, velocity, CFAROut, mmwavedata,dopplerSum, dopplerSum1,dopplerSum2,pcStrc ] = mmwaveResults_urrsrrNormal(radarDataAll, vel1data, vel2data,lidarDataFrame_singL, num2str(i),lineId,Temp1_accumulate);
                                 [ distanceCoor_vel, velocityCoor1,velocityCoor2,distanceCoor,velocityCoor, distance, velocity, CFAROut, mmwavedata,dopplerSum, dopplerSum1,dopplerSum2,pcStrc ] = mmwaveResults_urrsrrNormal(radarDataAll, vel1data, vel2data,lidarDataFrame_singL, num2str(i),lineId,Temp1_accumulate);
                             case 'CRT'
                                 methodSign = 5;
                                 [ distanceCoor, velocityCoor, distance, velocity, mmwavedata, dopplerSum ] = mmwaveResults_CRT(radarDataAll, vel1data, vel2data, num2str(i));
 %                                 [~] = dataCubeProcess(radarDataAll, vel1data, vel2data,lidarDataFrame_singL, num2str(i),lineId);
-                            case 'Lidar'
-                                startNum = 40;
-                                lidarAngleGrid = (lidarData_frame(1:end-4,1)*256+lidarData_frame(1:end-4,2))/100-90;
-                                lidarData = lidarData_frame(1:end-4,startNum:end);
-                                [m,n] = size(lidarData);
-                                lidarRangeGrid = 0.15*([1:n]);
-                                figure(3);imagesc(lidarAngleGrid,lidarRangeGrid,lidarData');
-                                xlabel('角度');
-                                ylabel('m');
-                                set(gca,'YDIR','normal');
-                                pause(0.05);
+                            case 'apply'
+                                mmwaveResults_urrsrrNormal_applied(radarDataAll, vel1data, vel2data,lidarDataFrame_singL, num2str(i),lineId,Temp1_accumulate);
+%                                 startNum = 40;
+%                                 lidarAngleGrid = (lidarData_frame(1:end-4,1)*256+lidarData_frame(1:end-4,2))/100-90;
+%                                 lidarData = lidarData_frame(1:end-4,startNum:end);
+%                                 [m,n] = size(lidarData);
+%                                 lidarRangeGrid = 0.15*([1:n]);
+%                                 figure(3);imagesc(lidarAngleGrid,lidarRangeGrid,lidarData');
+%                                 xlabel('角度');
+%                                 ylabel('m');
+%                                 set(gca,'YDIR','normal');
+%                                 pause(0.05);
                         end
 
                 end

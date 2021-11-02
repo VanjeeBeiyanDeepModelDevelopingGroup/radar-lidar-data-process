@@ -1,6 +1,10 @@
 % 取range下的slow_time*channel矩阵输入music算法计算angle谱响应
 % 特点：遍历按range列排序后的cfar结果，构造channel*slow time的matrix进行music谱估计
 function [ spectrumAngle ] = AOA2_v1_9( dopplerOut, cfarOut, TX_num, RX_num, numADCSamples, dopplerBin_num)
+    if isempty(cfarOut)
+        spectrumAngle = [];
+        return
+    end
     % angleBin_num 输入真实天线个数
     L = 360;
     if TX_num == 3

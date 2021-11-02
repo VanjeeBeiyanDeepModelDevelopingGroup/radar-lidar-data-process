@@ -38,6 +38,10 @@ frameIndex = uicontrol('Style','edit','Units','pixels',...
 % frameNumtext = uicontrol(f,'Style','text','Units','pixels',...
 %     'FontSize',12,'Position',[668,555,200,30],...
 %     'Visible','off','HorizontalAlignment','left');
+videoFile = uicontrol('Style','pushbutton','Units','pixels',...
+    'String','视频文件','FontSize',12,...
+    'Position',[50,500,100,30],...
+    'Callback',@video_button_Callback);
 framePlotButton = uicontrol('Style','pushbutton','Units','pixels',...
     'String','start','FontSize',12,...
     'Position',[350,516,40,30],...
@@ -64,7 +68,7 @@ mode3 = uicontrol(modeButtonGroup,'Style','radiobutton',...
 methodButtonGroup1 = uibuttongroup('Visible','off','Units','pixels',...
                   'Position',[700 516 105 80],'Title','Methods');
 method1 = uicontrol(methodButtonGroup1,'Style','radiobutton',...
-                  'String','normal',...
+                  'String','test',...
                   'Position',[10 50 50 15]);
 method2 = uicontrol(methodButtonGroup1,'Style','radiobutton',...
                   'String','doppler comp',...
@@ -81,7 +85,7 @@ method2 = uicontrol(methodButtonGroup2,'Style','radiobutton',...
                   'String','CRT',...
                   'Position',[10 30 100 15]);
 method3 = uicontrol(methodButtonGroup2,'Style','radiobutton',...
-                  'String','Lidar',...
+                  'String','apply',...
                   'Position',[10 10 70 15]);              
 finalResultTable = uitable(f, 'ColumnName', {'Distance'; 'Velocity'; 'x'; 'y'; 'z'}, 'Position', [880, 50, 275, 500]);
 
@@ -111,6 +115,7 @@ movegui(f,'center')
 f.Visible = 'on';
 global lidar_dir_path
 global radar_dir_path
+global video_dir_path
 global radarDataAll
 global vel1data
 global vel2data
@@ -123,6 +128,15 @@ global frame_num
 global stopFlag
 global area_cor_form4
 global x_cfd_cor_form4
+
+
+
+
+    function video_button_Callback(~,~)
+        %% 读取视频文件路径
+        [video_dir_path] = uigetdir()
+    end
+
     function file_button_Callback(~,~)
         [lidar_dir_path] = uigetdir();
 %         fprintf("开始读激光雷达数据......\n");
@@ -135,7 +149,8 @@ global x_cfd_cor_form4
 %         fprintf("结束!\n");
 %         fprintf("读取修正参数......\n");
         %% 载入修正参数
-        area_t = load('.\lidar\02_detection\rangeMeasure\measureParam\4_area_t.mat');%载入通道4修正系数
+%         area_t = load('.\lidar\02_detection\rangeMeasure\measureParam\4_area_t.mat');%载入通道4修正系数
+        area_t = load('./lidar/02_detection/rangeMeasure/measureParam/4_area_t.mat');%载入通道4修正系数,unix系统中是反向斜线
         area_cor_form4=area_t.area_t(1,:);
         x_cfd_cor_form4=area_t.area_t(2,:);
         % load('.\measureParam\5_area_t.mat');%载入通道5修正系数
@@ -169,11 +184,24 @@ global x_cfd_cor_form4
         frameNum = length(lidar_dir_struct);
         timestampShift = 5;
         startFrameNum = str2num(frameIndex.String);
+        % 获取视频文件
+        vid = VideoReader([video_dir_path, '/video.mp4']);
+        if vid == -1
+           fprintf('不存在对应的视频文件！\n');
+           return;
+        end
+        stopFlag = false;
         for i=startFrameNum+2:frameNum
+            if stopFlag
+                fprintf("停止!\n");
+                break;
+            end
             fprintf('帧号：%d\n',i);
         %% 获取文件名
-            lidar_filename = [lidar_dir_path,'\', lidar_dir_struct{i}];
-            radar_filename = [radar_dir_path,'\', radar_dir_struct{i}];
+%             lidar_filename = [lidar_dir_path,'\', lidar_dir_struct{i}];
+%             radar_filename = [radar_dir_path,'\', radar_dir_struct{i}];
+            lidar_filename = [lidar_dir_path,'/', lidar_dir_struct{i}]; % unix系统中是反向斜线
+            radar_filename = [radar_dir_path,'/', radar_dir_struct{i}];% unix系统中是反向斜线
         %% 将帧号对齐
 %             lidarFrameNum = str2num(lidar_dir_struct{i}(1:end-4));
 %             radarFrameNum = str2num(radar_dir_struct{i}(1:end-4));
@@ -202,6 +230,7 @@ global x_cfd_cor_form4
         %% 读取激光雷达数据
             fid = fopen(lidar_filename);
             lidarData_frame = fread(fid);
+            fclose(fid);
             lidarData_mat = zeros(606,300);
             for j=1:300
                 lidarData_mat(:,j) = lidarData_frame(1+606*(j-1):606*j);
@@ -265,7 +294,10 @@ global x_cfd_cor_form4
 %                 size(vel1data)
 %                 size(vel2data)
             end
-            fprintf("结束!\n");
+            %% 读取视频
+            frame_index = floor((i - 1) / 2) * 5 + 2 + rem(i, 2);
+            frame = read(vid, frame_index);
+            figure(2);subplot(2,2,2);imshow(frame);
             %% 数据处理
             linNum=1;
             if linNum > 1
@@ -315,7 +347,9 @@ global x_cfd_cor_form4
                                 methodSign = 5;
                                 [ distanceCoor, velocityCoor, distance, velocity, mmwavedata, dopplerSum ] = mmwaveResults_CRT(radarDataAll, vel1data, vel2data, num2str(i));
 %                                 [~] = dataCubeProcess(radarDataAll, vel1data, vel2data,lidarDataFrame_singL, num2str(i),lineId);
-                            case 'Lidar'
+                            case 'apply'
+%                                 [ distanceCoor_vel, velocityCoor1,velocityCoor2,distanceCoor,velocityCoor, distance, velocity, CFAROut, mmwavedata,dopplerSum, dopplerSum1,dopplerSum2,pcStrc ] = mmwaveResults_urrsrrNormal_applied(radarDataAll, vel1data, vel2data,lidarDataFrame_singL, num2str(1),lineId);
+                                mmwaveResults_urrsrrNormal_applied(radarDataAll, vel1data, vel2data,lidarDataFrame_singL, num2str(1),lineId);
 %                                 startNum = 40;
 %                                 lidarAngleGrid = (lidarData_frame(1:end-4,1)*256+lidarData_frame(1:end-4,2))/100-90;
 %                                 lidarData = lidarData_frame(1:end-4,startNum:end);
@@ -332,6 +366,7 @@ global x_cfd_cor_form4
                 
             end
         end
+        
     end
     % 删除当前包，读下一包到内存里
     function frame_change_next_Callback(~,~)
