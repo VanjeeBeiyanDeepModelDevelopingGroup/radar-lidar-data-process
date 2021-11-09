@@ -138,7 +138,7 @@ global x_cfd_cor_form4
     end
 
     function file_button_Callback(~,~)
-        [lidar_dir_path] = uigetdir();
+        [lidar_dir_path] = uigetdir()
 %         fprintf("开始读激光雷达数据......\n");
 %         filename
 %         data = load([dir_path,filename]);
@@ -159,13 +159,15 @@ global x_cfd_cor_form4
         % load('.\measureParam\6_area_t.mat');%载入通道6修正系数
         % area_cor_form6=area_t(1,:);
         % x_cfd_cor_form6=area_t(2,:);
-
+        %% 直接对其他路径进行赋值
+        video_dir_path = lidar_dir_path(1:end-5)
+        radar_dir_path = [video_dir_path,'radar']
     end
-
-     function mmwavefile_Callback(~,~)         
-         radar_dir_path = uigetdir();
-     end
-
+    %% 读取毫米波文件
+    function mmwavefile_Callback(~,~)         
+     radar_dir_path = uigetdir()
+    end
+    
     function bselection(~,event)
         if strcmp(event.NewValue.String, 'urr') || strcmp(modeButtonGroup.SelectedObject.String, 'mrr')
             methodButtonGroup2.Visible = 'off';

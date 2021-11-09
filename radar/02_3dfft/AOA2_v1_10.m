@@ -1,7 +1,7 @@
 % 生成cfar后用fft进行角度估计的RA Map结果
 function [ RAMap_fft, elevOut ] = AOA2_v1_10( dopplerOut, CFAROut, TX_num, RX_num, dopplerBin_num, angleBin_num, MAX_VEL_ENH_PROCESSING)
     if isempty(CFAROut)
-        azimuthOut = [];
+        RAMap_fft = [];
         elevOut = [];
         return;
     end

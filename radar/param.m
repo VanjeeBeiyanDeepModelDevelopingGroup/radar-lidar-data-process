@@ -29,11 +29,11 @@ classdef param
         CFARTHRESHOLD_N_BIT_FRAC = 8;
         guardLen_doppler = 2;
         winLen_doppler = 4;
-        thresholdScale_doppler = 0.3;
+        thresholdScale_doppler = 0.2;
         USRR_enhance = 0.6;
         guardLen_range = 4;
         winLen_range = 8;
-        thresholdScale_range = 0.3;
+        thresholdScale_range = 0.2;
         cfartype = 'so';
         angleBin_num = 64;
         musicBin = 360;
@@ -41,11 +41,11 @@ classdef param
 
         MRR_guardLen_doppler = 6;
         MRR_winLen_doppler = 10;
-        MRR_thresholdScale_doppler = 0.8;
+        MRR_thresholdScale_doppler = 0.6;
         MRR_enhance = 0.7;
         MRR_guardLen_range = 6;
         MRR_winLen_range = 10;
-        MRR_thresholdScale_range = 0.8;
+        MRR_thresholdScale_range = 0.6;
         
         
         MRR_CHIRP_IDLETIME_1 = 0;

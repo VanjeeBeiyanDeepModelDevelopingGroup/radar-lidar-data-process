@@ -138,7 +138,7 @@ startNum = 40;
 lidarAngleGrid = (lidarData_frame(1:end-4,1)*256+lidarData_frame(1:end-4,2))/100-90;
 lidarData = lidarData_frame(1:end-4,startNum:end);
 [m,n] = size(lidarData);
-lidarRangeGrid = 0.15*([1:n]);
+lidarRangeGrid = 0.15*([1:n])-0.4546;
 h=figure(2);figureName = ['Ö¡ºÅ£º',num2str(this_frameNum)];
 set(h,'name',figureName,'Numbertitle','off')
 % subplot(4,2,1);
@@ -242,7 +242,9 @@ peakValue = dopplerSum([row, col]);
 velocityOut = ((peakGrpingCol - dopplerBin_num / 2 - 1) * c * 3600) / (2 * dopplerBin_num * TX_num * centerFreq * chirpInterval * 1000);
 distanceOut = (peakGrpingRow * c * digOutSampleRate * 1e3) / (2 * slope * numADCSamples);
 CFAROut = [peakGrpingRow.', peakGrpingCol.'];
-CFAROut = sortrows(CFAROut,1);
+if ~isempty(CFAROut)
+    CFAROut = sortrows(CFAROut,1);
+end
 % CFAROut = [row, col];
 
 % vel CFAR test
@@ -291,7 +293,9 @@ velocityOut_vel = ((peakGrpingCol_vel1 - numCirpsPerFrame_vel1 / 2 - 1) * c * 36
 distanceOut_vel = (peakGrpingRow_vel1 * c * digOutSampleRate_vel * 1e3) / (2 * slope_vel * numADCSamples_vel);
 CFAROut_vel = [peakGrpingRow_vel1.', peakGrpingCol_vel1.'];
 % CFAROut_vel = [row_vel1, col_vel1];
-CFAROut_vel = sortrows(CFAROut_vel,1);
+if ~isempty(CFAROut_vel)
+    CFAROut_vel = sortrows(CFAROut_vel,1);
+end
 %%% AOA FFT %%%
 angleBin_num = param.angleBin_num;
 MAX_VEL_ENH_PROCESSING = 0;
@@ -498,7 +502,7 @@ subplot(3,2,2);
 imagesc(xgrid_mrr,ygrid_mrr,carte_RAMap_mrr);hold on
 scatter(x,y,3,'r','filled');
 set(gca,'YDIR','normal');title('CFAR MUSIC mrr range-angle map');
-mesh(X_mrr,Y_mrr,carte_RAMap_mrr);
+% mesh(X_mrr,Y_mrr,carte_RAMap_mrr);
 subplot(3,2,3);imagesc(xgrid_srr_cfarfft,ygrid_srr_cfarfft,carte_RAMap_srr_cfarfft);hold on
 scatter(x,y,3,'r','filled');
 set(gca,'YDIR','normal');title('CFAR FFT usrr range-angle map');
