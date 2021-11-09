@@ -139,7 +139,7 @@ startNum = 40;
 lidarAngleGrid = (lidarData_frame(1:end-4,1)*256+lidarData_frame(1:end-4,2))/100-90;
 lidarData = lidarData_frame(1:end-4,startNum:end);
 [m,n] = size(lidarData);
-lidarRangeGrid = 0.15*([1:n]);
+lidarRangeGrid = 0.15*([1:n])-0.4546;
 % h=figure(2);figureName = ['Ö¡ºÅ£º',num2str(this_frameNum)];
 % set(h,'name',figureName,'Numbertitle','off')
 % subplot(4,2,1);
@@ -501,29 +501,14 @@ imagesc(xgrid_usrr,ygrid_usrr,carte_RAMap);hold on
 scatter(x,y,3,'r','filled');
 % mesh(X_usrr,Y_usrr,carte_RAMap);
 set(gca,'YDIR','normal');title('CFAR MUSIC srr range-angle map');
+xlim([5*min(x),5*max(x)]);ylim([0,max(y)]);
 % subplot(3,2,2);
 subplot(2,2,4);
 % [X_mrr,Y_mrr] = meshgrid(xgrid_mrr,ygrid_mrr);
 imagesc(xgrid_mrr,ygrid_mrr,carte_RAMap_mrr);hold on
 scatter(x,y,3,'r','filled');
 set(gca,'YDIR','normal');title('CFAR MUSIC mrr range-angle map');
-% mesh(X_mrr,Y_mrr,carte_RAMap_mrr);
-% subplot(3,2,3);imagesc(xgrid_srr_cfarfft,ygrid_srr_cfarfft,carte_RAMap_srr_cfarfft);hold on
-% scatter(x,y,3,'r','filled');
-% set(gca,'YDIR','normal');title('CFAR FFT usrr range-angle map');
-% subplot(3,2,4);imagesc(xgrid_mrr_cfarfft,ygrid_mrr_cfarfft,carte_RAMap_mrr_cfarfft);hold on
-% scatter(x,y,3,'r','filled');
-% set(gca,'YDIR','normal');title('CFAR FFT mrr range-angle map');
-% subplot(3,2,5);imagesc(xgrid_srr_fft,ygrid_srr_fft,carte_RAMap_srr_fft);hold on
-% scatter(x,y,3,'r','filled');
-% set(gca,'YDIR','normal');title('FFT usrr range-angle map');
-% subplot(3,2,6);imagesc(xgrid_mrr_fft,ygrid_mrr_fft,carte_RAMap_mrr_fft);hold on
-% scatter(x,y,3,'r','filled');
-% set(gca,'YDIR','normal');title('FFT mrr range-angle map');
-% figure(3);hold off
-% figure(h);hold off
-% figure(5);hold off
-xlim([-30,30]);
+xlim([5*min(x),5*max(x)]);ylim([0,max(y)]);
 toc
 vars = {'adcStart', 'adcStart_vel', 'adcStartTimeConst', 'adcStartTimeConst_vel', 'agl_grid', 'agl_grid_music', 'angle', 'angleBin_num', 'azimuthOut', 'bandwidth', 'bandwidth_vel', 'c', 'carte_RAMap', 'carte_RAMap_mrr', 'centerFreq', 'centerFreq_vel', 'CFARDopplerDomainOut', 'CFARDopplerDomainOut_vel1', 'CFAROut', 'CFAROut_vel', 'CFAROutTemp', 'CFAROutTemp_vel1', 'CFARRangeDomainOut', 'CFARRangeDomainOut_vel1', 'cfartype', 'chirpInterval', 'chirpInterval_vel1', 'chirpInterval_vel2', 'col', 'col_vel1', 'data_num', 'digOutSampleRate', 'digOutSampleRate_vel', 'distanceCoor', 'distanceCoor_vel1','distanceOut', 'distanceOut_vel', 'dopplerBin_num', 'dopplerIn', 'dopplerIn_vel1', 'dopplerIn_vel2', 'dopplerLog2Abs', 'dopplerLog2Abs_vel1', 'dopplerLog2Abs_vel2', 'dopplerOut', 'dopplerOut_vel1', 'dopplerOut_vel2', 'dopplerSum', 'dopplerSum_vel1', 'dopplerSum_vel2', 'dopplerWin', 'dopplerWin_vel', 'dopplerWindowCoeffVec', 'dopplerWindowCoeffVec_vel', 'dopplerWinLen', 'dopplerWinLen_vel', 'elevOut', 'frame_index', 'frameIndex', 'freqSlopeConst', 'freqSlopeConst_vel', 'guardLen', 'i', 'idleTimeConst', 'idleTimeConst_vel1', 'idleTimeConst_vel2', 'lidarAngleGrid', 'lidarData', 'lidarData_frame', 'lidarDataFrame', 'lidarRangeGrid', 'lineId', 'm', 'MAX_NUM_DET_PER_RANGE_GATE', 'MAX_VEL_ENH_PROCESSING', 'maxIdx', 'mmwavedata', 'mmwavedata_vel1', 'n', 'nextCnt', 'noiseDivShift', 'numADCSamples', 'numADCSamples_vel', 'numCirpsPerFrame_vel1', 'numCirpsPerFrame_vel2', 'numTarget', 'pcPolar', 'pcStrc', 'pcStrc1', 'pcStrc2', 'peakGrpingCol', 'peakGrpingCol_vel1', 'peakGrpingRow', 'peakGrpingRow_vel1', 'peakValue', 'peakValue_vel1', 'radarDataAll', 'RAMap_fromMat_cfar', 'RAMap_fromMat_cfar_mrr', 'rampEndTime', 'rampEndTime_vel', 'range', 'range_vel1', 'rangeAbs', 'rangeAbs_vel1', 'rangeOut', 'rangeOut_vel1', 'rangeOut_vel2', 'rangeWin', 'rangeWin_vel', 'RangeWindowCoeffVec', 'RangeWindowCoeffVec_vel', 'RangeWinLen', 'RangeWinLen_vel', 'row', 'row_vel1', 'RX_num', 'singleAzimuthOut', 'slope', 'slope_vel', 'startFreq', 'startFreq_vel', 'startFreqConst', 'startFreqConst_vel', 'startNum', 'this_frameNum', 'thresholdScale', 'TX_num', 'vel', 'vel1data', 'vel2data', 'vel_vel1', 'velocityCoor', 'velocityCoor_vel1', 'velocityCoor_vel2', 'velocityOut', 'velocityOut_vel', 'w', 'w1', 'winLen', 'x', 'xgrid_mrr', 'xgrid_usrr', 'y', 'ygrid_mrr', 'ygrid_usrr', 'z'};
 clear(vars{:})
