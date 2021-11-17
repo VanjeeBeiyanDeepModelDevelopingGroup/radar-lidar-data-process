@@ -27,24 +27,24 @@ classdef param
         
         MAX_NUM_DET_PER_RANGE_GATE = 3;
         CFARTHRESHOLD_N_BIT_FRAC = 8;
-        guardLen_doppler = 2;
-        winLen_doppler = 4;
+        guardLen_doppler = 4;  % doppler bin num = 32
+        winLen_doppler = 8;  % guardLen+winLen < 16
         thresholdScale_doppler = 0.2;
         USRR_enhance = 0.6;
-        guardLen_range = 4;
-        winLen_range = 8;
+        guardLen_range = 6;  % range bin num = 512
+        winLen_range = 12;  % rangeLen+winLen < 256
         thresholdScale_range = 0.2;
         cfartype = 'so';
         angleBin_num = 64;
         musicBin = 360;
         musicTimeWindow = 5;
 
-        MRR_guardLen_doppler = 6;
-        MRR_winLen_doppler = 10;
+        MRR_guardLen_doppler = 12;  % doppler bin num = 128
+        MRR_winLen_doppler = 20;  % guardLen+winLen < 64
         MRR_thresholdScale_doppler = 0.6;
         MRR_enhance = 0.7;
-        MRR_guardLen_range = 6;
-        MRR_winLen_range = 10;
+        MRR_guardLen_range =12;
+        MRR_winLen_range = 20;
         MRR_thresholdScale_range = 0.6;
         
         

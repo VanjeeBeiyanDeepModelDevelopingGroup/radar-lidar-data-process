@@ -297,9 +297,14 @@ global x_cfd_cor_form4
 %                 size(vel2data)
             end
             %% 读取视频
-            frame_index = floor((i - 1) / 2) * 5 + 2 + rem(i, 2);
+%             frame_index = floor((i - 1) / 2) * 5 + 2 + rem(i, 2);
+%             frame_index = (i-1)*3+1;
+            frame_index = floor((i - 1) / 2) * 5-30;
             frame = read(vid, frame_index);
-            figure(2);subplot(2,2,2);imshow(frame);
+            h=figure(2);figureName = ['帧号：',num2str(i)];
+            set(h,'name',figureName,'Numbertitle','off') 
+            subplot(3,2,2);imshow(frame);title(num2str(frame_index));
+%             figure(3);subplot(3,1,2);imshow(frame);
             %% 数据处理
             linNum=1;
             if linNum > 1

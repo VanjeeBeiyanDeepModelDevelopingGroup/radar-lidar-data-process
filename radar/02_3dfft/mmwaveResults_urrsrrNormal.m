@@ -48,8 +48,8 @@ rangeOut = bsxfun(@times, radarDataAll, rangeWin.');
 % rangeOut_size = size(rangeOut)
 % 所有数据构成128x512x3xn，即32x4个chirp，512个采样点，3个发送天线，n帧
 % 沿着第二个维度，做一维fft
-rangeOut = fftshift(fft(rangeOut, numADCSamples, 2),2);
-
+% rangeOut = fftshift(fft(rangeOut, numADCSamples, 2),2);
+rangeOut = fft(rangeOut, numADCSamples, 2);
 c = param.c;
 digOutSampleRate = param.digOutSampleRate;
 freqSlopeConst = param.freqSlopeConst;  % 测试那个指令
@@ -61,6 +61,8 @@ distanceCoor = ((1: numADCSamples) * c * digOutSampleRate * 1e3) / (2 * slope * 
 % 返回的是第n帧的第1个天线的第一个chirp的距离FFT
 % 更改，返回当前帧的第一个天线的所有chirp的range-FFT
 mmwavedata = rangeAbs(:, :, 1, frame_index);
+%% 标定步骤
+[ret] = targetSelect(rangeOut, distanceCoor, numADCSamples, dopplerBin_num, TX_num, RX_num, lidarDataFrame);
 
 % vel part %
 rangeWin_vel = hanning(numADCSamples_vel);
@@ -72,9 +74,11 @@ RangeWindowCoeffVec_vel(numADCSamples_vel-RangeWinLen_vel+1:numADCSamples_vel) =
 rangeWin_vel   = RangeWindowCoeffVec_vel;
 
 rangeOut_vel1 = bsxfun(@times, vel1data, rangeWin_vel.');
-rangeOut_vel1 = fftshift(fft(rangeOut_vel1, numADCSamples_vel, 2),2);
+% rangeOut_vel1 = fftshift(fft(rangeOut_vel1, numADCSamples_vel, 2),2);
+rangeOut_vel1 = fft(rangeOut_vel1, numADCSamples_vel, 2);
 rangeOut_vel2 = bsxfun(@times, vel2data, rangeWin_vel.');
-rangeOut_vel2 = fftshift(fft(rangeOut_vel2, numADCSamples_vel, 2),2);
+% rangeOut_vel2 = fftshift(fft(rangeOut_vel2, numADCSamples_vel, 2),2);
+rangeOut_vel2 = fft(rangeOut_vel2, numADCSamples_vel, 2);
 
 digOutSampleRate_vel = param.digOutSampleRate_vel;
 freqSlopeConst_vel = param.freqSlopeConst_vel;  % 测试那个指令
@@ -111,12 +115,13 @@ for n = 1: numADCSamples
 
 end
 dopplerIn = bsxfun(@times, dopplerIn, dopplerWin.');
-dopplerOut = fftshift(fft(dopplerIn, dopplerBin_num, 2));
+dopplerOut = fftshift(fft(dopplerIn, dopplerBin_num, 2),2);
+% dopplerOut = fft(dopplerIn, dopplerBin_num, 2);
 dopplerLog2Abs = 20*log10(abs(dopplerOut));
 dopplerSum = sum(dopplerLog2Abs, [3 4]);% 这里应该做beamforming吧，可以做beamforming，可以试试
 dopplerSum = squeeze(dopplerSum); 
 % 多普勒累积增强
-dopplerSum = SNREnhance(squeeze(sum(abs(dopplerOut),[3,4])),param.USRR_enhance);
+% dopplerSum = SNREnhance(squeeze(sum(abs(dopplerOut),[3,4])),param.USRR_enhance);
 % 结束
 startFreqConst = param.startFreqConst;
 startFreq = startFreqConst * 1e9;
@@ -168,19 +173,19 @@ for m = 1: RX_num
 end
 
 dopplerIn_vel1 = bsxfun(@times, dopplerIn_vel1, dopplerWin_vel.');
-dopplerOut_vel1 = fftshift(fft(dopplerIn_vel1, numCirpsPerFrame_vel1, 2));
+dopplerOut_vel1 = fftshift(fft(dopplerIn_vel1, numCirpsPerFrame_vel1, 2),2);
 dopplerLog2Abs_vel1 = abs(dopplerOut_vel1);
 dopplerSum_vel1 = sum(dopplerLog2Abs_vel1, 3);
 dopplerSum_vel1 = squeeze(dopplerSum_vel1);
 % 信噪比增强
-dopplerSum_vel1 = SNREnhance(squeeze(sum(abs(dopplerOut_vel1),[3,4])),param.MRR_enhance);
+% dopplerSum_vel1 = SNREnhance(squeeze(sum(abs(dopplerOut_vel1),[3,4])),param.MRR_enhance);
 dopplerIn_vel2 = bsxfun(@times, dopplerIn_vel2, dopplerWin_vel.');
-dopplerOut_vel2 = fftshift(fft(dopplerIn_vel2, numCirpsPerFrame_vel2, 2));
+dopplerOut_vel2 = fftshift(fft(dopplerIn_vel2, numCirpsPerFrame_vel2, 2),2);
 dopplerLog2Abs_vel2 = abs(dopplerOut_vel2);
 dopplerSum_vel2 = sum(dopplerLog2Abs_vel2, 3);
 dopplerSum_vel2 = squeeze(dopplerSum_vel2);
 % 信噪比增强
-dopplerSum_vel2 = SNREnhance(squeeze(sum(abs(dopplerOut_vel2),[3,4])),param.MRR_enhance);
+% dopplerSum_vel2 = SNREnhance(squeeze(sum(abs(dopplerOut_vel2),[3,4])),param.MRR_enhance);
 startFreqConst_vel = param.startFreqConst_vel;
 startFreq_vel = startFreqConst_vel * 1e9;
 bandwidth_vel = (slope_vel * numADCSamples_vel) / (digOutSampleRate_vel * 1e3);
@@ -202,7 +207,7 @@ set(gca,'YDIR','normal');hold on
 subplot(4,2,4);
 imagesc(distanceCoor_vel1,velocityCoor_vel2,dopplerSum_vel2');
 set(gca,'YDIR','normal');
-% 结束%
+%% % 结束%
 %%% CFAR %%%
 % original part %
 guardLen = param.guardLen_doppler;
@@ -233,7 +238,7 @@ for m = 1: dopplerBin_num
     end
 
 end
-CFAROutTemp = CFARDopplerDomainOut & CFARRangeDomainOut;
+CFAROutTemp = CFARDopplerDomainOut | CFARRangeDomainOut;
 [row, col] = find(CFAROutTemp(:, :));
 % figure;imagesc(CFAROutTemp');set(gca,'YDIR', 'normal');
 peakValue = dopplerSum([row, col]);
@@ -283,7 +288,8 @@ for m = 1: numCirpsPerFrame_vel1
 end
 
 
-CFAROutTemp_vel1 = CFARDopplerDomainOut_vel1 & CFARRangeDomainOut_vel1;
+% CFAROutTemp_vel1 = CFARDopplerDomainOut_vel1 & CFARRangeDomainOut_vel1;
+CFAROutTemp_vel1 = CFARDopplerDomainOut_vel1 | CFARRangeDomainOut_vel1;
 % figure;imagesc(CFAROutTemp_vel1');set(gca,'YDIR', 'normal');
 [row_vel1, col_vel1] = find(CFAROutTemp_vel1(:, :));
 peakValue_vel1 = dopplerSum_vel1([row_vel1, col_vel1]);
@@ -315,7 +321,7 @@ for m = 1: numTarget
 
     singleAzimuthOut = azimuthOut(m, :);
     figure(3);subplot(3,1,2);
-    plot(agl_grid_music,abs(singleAzimuthOut));hold on;
+%     plot(agl_grid_music,abs(singleAzimuthOut));hold on;
     [ maxIdx, ~ ] = powerAndMax(singleAzimuthOut, param.musicBin);
 %         [maxIdx,~] = cfar_ca(singleAzimuthOut, dopplerBin_num, thresholdScale, noiseDivShift, guardLen, winLen);
     range = distanceCoor(CFAROut(m,1));
@@ -340,7 +346,7 @@ for m = 1: numTarget
 
     singleAzimuthOut = azimuthOut(m, :);
     figure(3);subplot(3,1,3);
-    plot(agl_grid_music,abs(singleAzimuthOut));hold on;
+%     plot(agl_grid_music,abs(singleAzimuthOut));hold on;
     [ maxIdx, ~ ] = powerAndMax(singleAzimuthOut, param.musicBin);
 %         [maxIdx,~] = cfar_ca(singleAzimuthOut, dopplerBin_num, thresholdScale, noiseDivShift, guardLen, winLen);
     range_vel1 = distanceCoor_vel1(CFAROut_vel(m,1));
@@ -367,7 +373,7 @@ if ~isempty(CFAROut)
     x_usrr = pcStrc_usrr.vertex.y(~isnan(pcStrc_usrr.vertex.y));
     z_usrr = pcStrc_usrr.vertex.z(~isnan(pcStrc_usrr.vertex.z));
 %     figure(2);subplot(4,2,1);
-    figure(3);subplot(3,1,1);plot(angleArr,rangeArr,'rp');
+%     figure(3);subplot(3,1,1);plot(angleArr,rangeArr,'rp');
     
 %     xlim([-30,30]);
 %     xlim([0,140]);
@@ -386,7 +392,7 @@ if ~isempty(CFAROut_vel)
     x_mrr = pcStrc_mrr.vertex.y(~isnan(pcStrc_mrr.vertex.y));
     z_mrr = pcStrc_mrr.vertex.z(~isnan(pcStrc_mrr.vertex.z));
 %     figure(2);subplot(4,2,1);
-    figure(3);subplot(3,1,1);plot(angleArr_mrr,rangeArr_mrr,'gp');
+%     figure(3);subplot(3,1,1);plot(angleArr_mrr,rangeArr_mrr,'gp');
     xlim([-30,30]);
     
 %     xlim([0,140]);
@@ -421,10 +427,10 @@ figure(2);subplot(4,2,5);
 [carte_RAMap,xgrid_usrr,ygrid_usrr] = polar2carte(RAMap_fromMat_cfar,agl_grid_music,distanceCoor,1);
 % [carte_RAMap,xgrid_usrr,ygrid_usrr] = polar2carte(RAMap',agl_grid,distanceCoor,1);
 imagesc(xgrid_usrr,ygrid_usrr,carte_RAMap);hold on
-if ~isempty(CFAROut)
-%     subplot(4,2,5);plot(angleArr,rangeArr,'rp');
-    subplot(4,2,5);plot(rangeArr.*sin(angleArr*pi/180),rangeArr.*cos(angleArr*pi/180),'rp');
-end
+% if ~isempty(CFAROut)
+% %     subplot(4,2,5);plot(angleArr,rangeArr,'rp');
+%     subplot(4,2,5);plot(rangeArr.*sin(angleArr*pi/180),rangeArr.*cos(angleArr*pi/180),'rp');
+% end
 set(gca,'YDIR','normal');title('usrr range-angle map');
 subplot(4,2,7);
 imagesc(agl_grid,velocityCoor,DopplerAngle_sum');
@@ -449,10 +455,10 @@ figure(2);subplot(4,2,6);
 [carte_RAMap_mrr,xgrid_mrr,ygrid_mrr] = polar2carte(RAMap_fromMat_cfar_mrr,agl_grid_music,distanceCoor_vel1,1);
 % [carte_RAMap_mrr,xgrid_mrr,ygrid_mrr] = polar2carte(RAMap_mrr',agl_grid,distanceCoor_vel1,1);
 imagesc(xgrid_mrr,ygrid_mrr,carte_RAMap_mrr);hold on
-if ~isempty(CFAROut_vel)
-%     subplot(4,2,6);plot(angleArr_mrr,rangeArr_mrr,'gp');
-    subplot(4,2,6);plot(rangeArr_mrr.*sin(angleArr_mrr*pi/180),rangeArr_mrr.*cos(angleArr_mrr*pi/180),'gp');
-end
+% if ~isempty(CFAROut_vel)
+% %     subplot(4,2,6);plot(angleArr_mrr,rangeArr_mrr,'gp');
+%     subplot(4,2,6);plot(rangeArr_mrr.*sin(angleArr_mrr*pi/180),rangeArr_mrr.*cos(angleArr_mrr*pi/180),'gp');
+% end
 set(gca,'YDIR','normal');title('mrr range-angle map');
 subplot(4,2,8);
 imagesc(agl_grid,velocityCoor_vel1,mrr_DopplerAngle_sum');
@@ -477,13 +483,13 @@ end
 if ~isempty(CFAROut_vel)
     scatter3(x_mrr,y_mrr,z_mrr,4,'g','filled');view([0,0,1]);
 end
-subplot(4,2,1);hold off
-xlim([-15,15]);ylim([0,100]);zlim([-2,2]);
+% subplot(4,2,1);hold off
+% xlim([-15,15]);ylim([0,100]);zlim([-2,2]);
 % 把激光点云画到毫米波RA图上去
 % subplot(4,2,5);scatter(pcPolar(:,1)-90,pcPolar(:,2),3,'r','filled');
 % subplot(4,2,6);scatter(pcPolar(:,1)-90,pcPolar(:,2),3,'r','filled');
-subplot(4,2,5);scatter(x,y,3,'y','filled');
-subplot(4,2,6);scatter(x,y,3,'y','filled');
+% subplot(4,2,5);scatter(x,y,3,'y','filled');
+% subplot(4,2,6);scatter(x,y,3,'y','filled');
 % pause(0.001);
 toc
 %% music分析结果

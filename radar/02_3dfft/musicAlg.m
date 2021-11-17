@@ -1,6 +1,8 @@
 function [outFreqSignal] = musicAlg(signal,L)
 %MUSICALG 自适应music算法
 %   输入1维信号，按照thresh分割特征向量和特征值，输出频率分析结果
+%   signal: 1维复数时域信号，格式是channel×n
+%   L：角度分辨率步长
 lamda = 1;
 d=lamda/2;
 [M,~] = size(signal);
@@ -19,12 +21,14 @@ X = signal*signal';% '这是共轭转置
 Qn = eigVec(:,1:M-1);
 %% 扫描所有角度，计算谱分析结果
 antennaArr = linspace(0,(N-1)*d,N)';
-scanAngle = linspace(-pi/2,pi/2,L)';
+% scanAngle = linspace(-pi/2,pi/2,L)';
+scanAngle = linspace(pi/2,-pi/2,L)';
 powerSpectrumInSpace = zeros(1,L);
 for i =1:L
     av = array_response_vector(antennaArr,scanAngle(i));
     powerSpectrumInSpace(i) = 1/norm(Qn'*av);
 end
+% 线性映射
 outFreqSignal = (powerSpectrumInSpace-min(powerSpectrumInSpace))/(max(powerSpectrumInSpace)-min(powerSpectrumInSpace));
 % outFreqSignal = powerSpectrumInSpace/max(powerSpectrumInSpace);
 

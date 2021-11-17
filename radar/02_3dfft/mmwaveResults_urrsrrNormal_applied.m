@@ -49,7 +49,8 @@ rangeOut = bsxfun(@times, radarDataAll, rangeWin.');
 % rangeOut_size = size(rangeOut)
 % 所有数据构成128x512x3xn，即32x4个chirp，512个采样点，3个发送天线，n帧
 % 沿着第二个维度，做一维fft
-rangeOut = fftshift(fft(rangeOut, numADCSamples, 2),2);
+% rangeOut = fftshift(fft(rangeOut, numADCSamples, 2),2);
+rangeOut = fft(rangeOut, numADCSamples, 2);
 
 c = param.c;
 digOutSampleRate = param.digOutSampleRate;
@@ -73,9 +74,11 @@ RangeWindowCoeffVec_vel(numADCSamples_vel-RangeWinLen_vel+1:numADCSamples_vel) =
 rangeWin_vel   = RangeWindowCoeffVec_vel;
 
 rangeOut_vel1 = bsxfun(@times, vel1data, rangeWin_vel.');
-rangeOut_vel1 = fftshift(fft(rangeOut_vel1, numADCSamples_vel, 2),2);
+% rangeOut_vel1 = fftshift(fft(rangeOut_vel1, numADCSamples_vel, 2),2);
+rangeOut_vel1 = fft(rangeOut_vel1, numADCSamples_vel, 2);
 rangeOut_vel2 = bsxfun(@times, vel2data, rangeWin_vel.');
-rangeOut_vel2 = fftshift(fft(rangeOut_vel2, numADCSamples_vel, 2),2);
+% rangeOut_vel2 = fftshift(fft(rangeOut_vel2, numADCSamples_vel, 2),2);
+rangeOut_vel2 = fft(rangeOut_vel2, numADCSamples_vel, 2);
 
 digOutSampleRate_vel = param.digOutSampleRate_vel;
 freqSlopeConst_vel = param.freqSlopeConst_vel;  % 测试那个指令
@@ -112,7 +115,7 @@ for n = 1: numADCSamples
 
 end
 dopplerIn = bsxfun(@times, dopplerIn, dopplerWin.');
-dopplerOut = fftshift(fft(dopplerIn, dopplerBin_num, 2));
+dopplerOut = fftshift(fft(dopplerIn, dopplerBin_num, 2),2);
 dopplerLog2Abs = 20*log10(abs(dopplerOut));
 dopplerSum = sum(dopplerLog2Abs, [3 4]);% 这里应该做beamforming吧，可以做beamforming，可以试试
 dopplerSum = squeeze(dopplerSum); 
@@ -139,7 +142,7 @@ startNum = 40;
 lidarAngleGrid = (lidarData_frame(1:end-4,1)*256+lidarData_frame(1:end-4,2))/100-90;
 lidarData = lidarData_frame(1:end-4,startNum:end);
 [m,n] = size(lidarData);
-lidarRangeGrid = 0.15*([1:n])-0.4546;
+lidarRangeGrid = 0.15*([1:n])-2*0.4546;
 % h=figure(2);figureName = ['帧号：',num2str(this_frameNum)];
 % set(h,'name',figureName,'Numbertitle','off')
 % subplot(4,2,1);
@@ -169,14 +172,14 @@ for m = 1: RX_num
 end
 
 dopplerIn_vel1 = bsxfun(@times, dopplerIn_vel1, dopplerWin_vel.');
-dopplerOut_vel1 = fftshift(fft(dopplerIn_vel1, numCirpsPerFrame_vel1, 2));
+dopplerOut_vel1 = fftshift(fft(dopplerIn_vel1, numCirpsPerFrame_vel1, 2),2);
 dopplerLog2Abs_vel1 = abs(dopplerOut_vel1);
 dopplerSum_vel1 = sum(dopplerLog2Abs_vel1, 3);
 dopplerSum_vel1 = squeeze(dopplerSum_vel1);
 % 信噪比增强
 dopplerSum_vel1 = SNREnhance(squeeze(sum(abs(dopplerOut_vel1),[3,4])),param.MRR_enhance);
 dopplerIn_vel2 = bsxfun(@times, dopplerIn_vel2, dopplerWin_vel.');
-dopplerOut_vel2 = fftshift(fft(dopplerIn_vel2, numCirpsPerFrame_vel2, 2));
+dopplerOut_vel2 = fftshift(fft(dopplerIn_vel2, numCirpsPerFrame_vel2, 2),2);
 dopplerLog2Abs_vel2 = abs(dopplerOut_vel2);
 dopplerSum_vel2 = sum(dopplerLog2Abs_vel2, 3);
 dopplerSum_vel2 = squeeze(dopplerSum_vel2);
@@ -307,8 +310,26 @@ tic
 pcStrc1 = [];
 w = linspace(-1,1,angleBin_num); % angle_grid
 agl_grid = asin(w)*180/pi; % [-1,1]->[-pi/2,pi/2]
-w1 = linspace(-1,1,param.musicBin);
-agl_grid_music = asin(w1)*180/pi;
+w1 = linspace(-pi/2,pi/2,param.musicBin);
+% agl_grid_music = asin(w1)*180/pi;
+agl_grid_music = w1*180/pi;
+% figure;plot(agl_grid_music,'r');hold on
+% 修正角度输出
+angle_below_minus10 = 0;
+index_below_minus10 = 0;
+for i=1:length(w1)
+    if agl_grid_music(i)>=-10 && agl_grid_music(i)<=10
+        agl_grid_music(i) = -0.0255*agl_grid_music(i)^2+1.527*agl_grid_music(i)-3.596;
+    end
+    if agl_grid_music(i)<=-10
+        angle_below_minus10 = agl_grid_music(i);
+        index_below_minus10 = i;
+    end
+end
+agl_slope = (angle_below_minus10 - agl_grid_music(1))/(index_below_minus10-1);
+b = angle_below_minus10 - agl_slope*index_below_minus10;
+agl_grid_music(1:index_below_minus10) = agl_slope*[1:index_below_minus10]+b;
+% plot(agl_grid_music,'b');hold off
 [azimuthOut, elevOut] = AOA2_v1_3(dopplerOut, CFAROut, TX_num, RX_num, dopplerBin_num, angleBin_num, MAX_VEL_ENH_PROCESSING);
 % hh=figure;
 [numTarget,~] = size(CFAROut);
@@ -358,7 +379,7 @@ toc
 % if ~isempty(CFAROut)
 %     range = distanceCoor(CFAROut(:,1));
 %     vel = velocityCoor(CFAROut(:,2));
-% %     figure(2);subplot(4,2,3);plot(range,vel,'rp'); % 画在usrr doppler图上
+%     figure(2);subplot(3,2,3);plot(range,vel,'rp');hold on % 画在usrr doppler图上
 %     
 %     % 3d位置
 %     angleArr = pcStrc1(:,1);
@@ -377,7 +398,7 @@ toc
 % if ~isempty(CFAROut_vel)
 %     range_vel1 = distanceCoor_vel1(CFAROut_vel(:,1));
 %     vel_vel1 = velocityCoor_vel1(CFAROut_vel(:,2));
-% %     figure(2);subplot(4,2,2);plot(range_vel1,vel_vel1,'gp'); % 画在vel1 doppler图上
+%     figure(2);subplot(3,2,4);plot(range_vel1,vel_vel1,'gp');hold on % 画在vel1 doppler图上
 %     
 %     % 3d位置
 %     angleArr_mrr = pcStrc2(:,1);
@@ -492,23 +513,44 @@ fprintf('画出music分析结果\n');
 tic
 % [rangeSpectrum,angleSpectrum] = spectrumAnalysis_0917(dataCube3dFFT);
 h=figure(2);%figureName = ['帧号：',num2str(this_frameNum)];
-subplot(2,2,1);imagesc(lidarAngleGrid,lidarRangeGrid,lidarData');
+subplot(3,2,1);imagesc(lidarAngleGrid,lidarRangeGrid,lidarData');
+set(gca,'YDIR','normal');
+subplot(3,2,3);
+imagesc(distanceCoor,velocityCoor,dopplerSum');
+set(gca,'YDIR','normal');
+subplot(3,2,4);
+imagesc(distanceCoor_vel1,velocityCoor_vel1,dopplerSum_vel1');
 set(gca,'YDIR','normal');
 % subplot(3,2,1);
-subplot(2,2,3);
+subplot(3,2,5);
 % [X_usrr,Y_usrr] = meshgrid(xgrid_usrr,ygrid_usrr);
 imagesc(xgrid_usrr,ygrid_usrr,carte_RAMap);hold on
 scatter(x,y,3,'r','filled');
 % mesh(X_usrr,Y_usrr,carte_RAMap);
 set(gca,'YDIR','normal');title('CFAR MUSIC srr range-angle map');
-xlim([5*min(x),5*max(x)]);ylim([0,max(y)]);
-% subplot(3,2,2);
-subplot(2,2,4);
+% xlim([5*min(x),5*max(x)]);ylim([0,max(y)]);
+% xlim([-5,5]);ylim([0,20]);
+subplot(3,2,6);
 % [X_mrr,Y_mrr] = meshgrid(xgrid_mrr,ygrid_mrr);
 imagesc(xgrid_mrr,ygrid_mrr,carte_RAMap_mrr);hold on
 scatter(x,y,3,'r','filled');
 set(gca,'YDIR','normal');title('CFAR MUSIC mrr range-angle map');
-xlim([5*min(x),5*max(x)]);ylim([0,max(y)]);
+% xlim([5*min(x),5*max(x)]);ylim([0,max(y)]);
+% xlim([-5,5]);ylim([0,20]);
+%画range fft结果
+% subplot(3,2,5);hold off;
+% [slowtimeNum,rangeBin] = size(mmwavedata);
+% for i=1:slowtimeNum
+%     % 第一根天线的所有range fft结果
+%     plot(distanceCoor,mmwavedata(i,:));hold on    
+% end
+% subplot(3,2,6);hold off;
+% [slowtimeNum_vel1,rangeBin_vel1] = size(mmwavedata_vel1);
+% for i=1:slowtimeNum
+%     % 第一根天线的所有range fft结果
+%     plot(distanceCoor_vel1,mmwavedata_vel1(i,:));hold on    
+% end
+% figure(2);hold off;
 toc
 vars = {'adcStart', 'adcStart_vel', 'adcStartTimeConst', 'adcStartTimeConst_vel', 'agl_grid', 'agl_grid_music', 'angle', 'angleBin_num', 'azimuthOut', 'bandwidth', 'bandwidth_vel', 'c', 'carte_RAMap', 'carte_RAMap_mrr', 'centerFreq', 'centerFreq_vel', 'CFARDopplerDomainOut', 'CFARDopplerDomainOut_vel1', 'CFAROut', 'CFAROut_vel', 'CFAROutTemp', 'CFAROutTemp_vel1', 'CFARRangeDomainOut', 'CFARRangeDomainOut_vel1', 'cfartype', 'chirpInterval', 'chirpInterval_vel1', 'chirpInterval_vel2', 'col', 'col_vel1', 'data_num', 'digOutSampleRate', 'digOutSampleRate_vel', 'distanceCoor', 'distanceCoor_vel1','distanceOut', 'distanceOut_vel', 'dopplerBin_num', 'dopplerIn', 'dopplerIn_vel1', 'dopplerIn_vel2', 'dopplerLog2Abs', 'dopplerLog2Abs_vel1', 'dopplerLog2Abs_vel2', 'dopplerOut', 'dopplerOut_vel1', 'dopplerOut_vel2', 'dopplerSum', 'dopplerSum_vel1', 'dopplerSum_vel2', 'dopplerWin', 'dopplerWin_vel', 'dopplerWindowCoeffVec', 'dopplerWindowCoeffVec_vel', 'dopplerWinLen', 'dopplerWinLen_vel', 'elevOut', 'frame_index', 'frameIndex', 'freqSlopeConst', 'freqSlopeConst_vel', 'guardLen', 'i', 'idleTimeConst', 'idleTimeConst_vel1', 'idleTimeConst_vel2', 'lidarAngleGrid', 'lidarData', 'lidarData_frame', 'lidarDataFrame', 'lidarRangeGrid', 'lineId', 'm', 'MAX_NUM_DET_PER_RANGE_GATE', 'MAX_VEL_ENH_PROCESSING', 'maxIdx', 'mmwavedata', 'mmwavedata_vel1', 'n', 'nextCnt', 'noiseDivShift', 'numADCSamples', 'numADCSamples_vel', 'numCirpsPerFrame_vel1', 'numCirpsPerFrame_vel2', 'numTarget', 'pcPolar', 'pcStrc', 'pcStrc1', 'pcStrc2', 'peakGrpingCol', 'peakGrpingCol_vel1', 'peakGrpingRow', 'peakGrpingRow_vel1', 'peakValue', 'peakValue_vel1', 'radarDataAll', 'RAMap_fromMat_cfar', 'RAMap_fromMat_cfar_mrr', 'rampEndTime', 'rampEndTime_vel', 'range', 'range_vel1', 'rangeAbs', 'rangeAbs_vel1', 'rangeOut', 'rangeOut_vel1', 'rangeOut_vel2', 'rangeWin', 'rangeWin_vel', 'RangeWindowCoeffVec', 'RangeWindowCoeffVec_vel', 'RangeWinLen', 'RangeWinLen_vel', 'row', 'row_vel1', 'RX_num', 'singleAzimuthOut', 'slope', 'slope_vel', 'startFreq', 'startFreq_vel', 'startFreqConst', 'startFreqConst_vel', 'startNum', 'this_frameNum', 'thresholdScale', 'TX_num', 'vel', 'vel1data', 'vel2data', 'vel_vel1', 'velocityCoor', 'velocityCoor_vel1', 'velocityCoor_vel2', 'velocityOut', 'velocityOut_vel', 'w', 'w1', 'winLen', 'x', 'xgrid_mrr', 'xgrid_usrr', 'y', 'ygrid_mrr', 'ygrid_usrr', 'z'};
 clear(vars{:})
