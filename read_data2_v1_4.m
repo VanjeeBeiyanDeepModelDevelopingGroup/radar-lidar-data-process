@@ -356,7 +356,7 @@ global x_cfd_cor_form4
 %                                 [~] = dataCubeProcess(radarDataAll, vel1data, vel2data,lidarDataFrame_singL, num2str(i),lineId);
                             case 'apply'
 %                                 [ distanceCoor_vel, velocityCoor1,velocityCoor2,distanceCoor,velocityCoor, distance, velocity, CFAROut, mmwavedata,dopplerSum, dopplerSum1,dopplerSum2,pcStrc ] = mmwaveResults_urrsrrNormal_applied(radarDataAll, vel1data, vel2data,lidarDataFrame_singL, num2str(1),lineId);
-                                mmwaveResults_urrsrrNormal_applied(radarDataAll, vel1data, vel2data,lidarDataFrame_singL, num2str(1),lineId);
+                                mmwaveResults_urrsrrNormal_applied(radarDataAll, vel1data, vel2data,lidarDataFrame_singL, num2str(1),lineId,frame_index);
 %                                 startNum = 40;
 %                                 lidarAngleGrid = (lidarData_frame(1:end-4,1)*256+lidarData_frame(1:end-4,2))/100-90;
 %                                 lidarData = lidarData_frame(1:end-4,startNum:end);

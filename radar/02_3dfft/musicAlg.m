@@ -5,6 +5,7 @@ function [outFreqSignal] = musicAlg(signal,L)
 %   L：角度分辨率步长
 lamda = 1;
 d=lamda/2;
+thresh = 100;
 [M,~] = size(signal);
 % filename1 = ['rawsig_',datestr(now,'HHMMSSFFF'),'.mat'];
 % save(filename1,'signal_1d');
@@ -13,12 +14,36 @@ d=lamda/2;
 N=M;
 %% 
 % 计算correlation matrix（由于采样长度有限，只能用接收信号的covariance matrix来替代）
-% 按照特征向量变化的一阶导来划分信号空间和噪声空间
 X = signal*signal';% '这是共轭转置
 % filename2 = ['covmat_',datestr(now,'HHMMSSFFF'),'.mat'];
 % save(filename2,'X');
 [eigVec,eigVal] = eig(X);
-Qn = eigVec(:,1:M-1);
+eigVal_arr = zeros(1,M);
+err_eigVal_arr = zeros(1,M);
+dim = M-1;
+% for i=1:M
+%     eigVal_arr(i) = eigVal(i,i);
+%     % 求eigVal的一阶导数
+%     if i>1
+%         err_eigVal_arr(i) = eigVal_arr(i)-eigVal_arr(i-1);
+%         % 第0个eigVec不可能是信号
+%         if i>2
+%             delta = err_eigVal_arr(i)/err_eigVal_arr(i-1);
+%             % 如果下一个导数值比上一个大thresh倍，那么下面那个很可能就是信号
+%             if delta < thresh
+%                 dim = i;
+%             end
+%         end
+%     end
+% end
+% if dim > M
+%     dim = M;
+% end
+% 按照特征向量变化的一阶导来划分信号空间和噪声空间
+% if dim < 7
+%     fprintf('hello world');
+% end
+Qn = eigVec(:,1:dim);
 %% 扫描所有角度，计算谱分析结果
 antennaArr = linspace(0,(N-1)*d,N)';
 % scanAngle = linspace(-pi/2,pi/2,L)';

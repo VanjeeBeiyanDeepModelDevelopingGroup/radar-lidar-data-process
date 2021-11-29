@@ -15,6 +15,8 @@ classdef param
         digOutSampleRate_vel = 4652;
 %         freqSlopeConst_vel = 4.830910263;
         freqSlopeConst_vel = 4.0;
+        angle_shift = 0; %deg
+        range_shift = 0; %meter
         
         startFreqConst = 77;
 %         bandwidth = (freqSlopeConst * 1e12 * numADCSamples) / (digOutSampleRate * 1e3);
