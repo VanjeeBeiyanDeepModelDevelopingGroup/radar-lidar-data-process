@@ -20,8 +20,8 @@
 
 % function [ distanceCoor_vel1, velocityCoor_vel1,velocityCoor_vel2, distanceOut_vel, velocityOut_vel, CFAROut_vel, mmwavedata_vel1, dopplerSum_vel1, dopplerSum_vel2 ] = mmwaveResults_urrsrrNormal(radarDataAll, vel1data, vel2data, frameIndex)
 % function [ distanceCoor_vel1, velocityCoor_vel1,velocityCoor_vel2,distanceCoor,velocityCoor, distanceOut_vel, velocityOut_vel, CFAROut_vel, mmwavedata_vel1, dopplerSum, dopplerSum_vel1, dopplerSum_vel2,pcStrc1 ] = mmwaveResults_urrsrrNormal(radarDataAll, vel1data, vel2data,lidarDataFrame, frameIndex,lineId,Temp1_accumulate)
-function [  ] = mmwaveResults_urrsrrNormal_applied(radarDataAll, vel1data, vel2data,lidarDataFrame, frameIndex,lineId,Temp1_accumulate)
-
+% function [  ] = mmwaveResults_urrsrrNormal_applied(radarDataAll, vel1data, vel2data,lidarDataFrame, frameIndex,lineId,Temp1_accumulate)
+function [  ] = mmwaveResults_urrsrrNormal_applied(radarDataAll, vel1data, vel2data,frameIndex)
 numADCSamples = param.numADCSamples;
 numADCSamples_vel = param.numADCSamples_vel;
 numCirpsPerFrame_vel1 = param.numCirpsPerFrame_vel1;
@@ -117,7 +117,7 @@ dopplerLog2Abs = 20*log10(abs(dopplerOut));
 dopplerSum = sum(dopplerLog2Abs, [3 4]);% 这里应该做beamforming吧，可以做beamforming，可以试试
 dopplerSum = squeeze(dopplerSum); 
 % 多普勒累积增强
-dopplerSum = SNREnhance(squeeze(sum(abs(dopplerOut),[3,4])),param.USRR_enhance);
+% dopplerSum = SNREnhance(squeeze(sum(abs(dopplerOut),[3,4])),param.USRR_enhance);
 % 结束
 startFreqConst = param.startFreqConst;
 startFreq = startFreqConst * 1e9;
@@ -133,13 +133,13 @@ velocityCoor = (((- dopplerBin_num / 2): (dopplerBin_num / 2 - 1)) * c * 3600) /
 
 %% 画出doppler图
 global nextCnt
-this_frameNum = frame_index+(nextCnt-1)*param.packLength;
-lidarData_frame = lidarDataFrame(:,:,this_frameNum); 
-startNum = 40;
-lidarAngleGrid = (lidarData_frame(1:end-4,1)*256+lidarData_frame(1:end-4,2))/100-90;
-lidarData = lidarData_frame(1:end-4,startNum:end);
-[m,n] = size(lidarData);
-lidarRangeGrid = 0.15*([1:n])-0.4546;
+% this_frameNum = frame_index+(nextCnt-1)*param.packLength;
+% lidarData_frame = lidarDataFrame(:,:,this_frameNum); 
+% startNum = 40;
+% lidarAngleGrid = (lidarData_frame(1:end-4,1)*256+lidarData_frame(1:end-4,2))/100-90;
+% lidarData = lidarData_frame(1:end-4,startNum:end);
+% [m,n] = size(lidarData);
+% lidarRangeGrid = 0.15*([1:n])-0.4546;
 % h=figure(2);figureName = ['帧号：',num2str(this_frameNum)];
 % set(h,'name',figureName,'Numbertitle','off')
 % subplot(4,2,1);
@@ -174,7 +174,7 @@ dopplerLog2Abs_vel1 = abs(dopplerOut_vel1);
 dopplerSum_vel1 = sum(dopplerLog2Abs_vel1, 3);
 dopplerSum_vel1 = squeeze(dopplerSum_vel1);
 % 信噪比增强
-dopplerSum_vel1 = SNREnhance(squeeze(sum(abs(dopplerOut_vel1),[3,4])),param.MRR_enhance);
+% dopplerSum_vel1 = SNREnhance(squeeze(sum(abs(dopplerOut_vel1),[3,4])),param.MRR_enhance);
 dopplerIn_vel2 = bsxfun(@times, dopplerIn_vel2, dopplerWin_vel.');
 dopplerOut_vel2 = fftshift(fft(dopplerIn_vel2, numCirpsPerFrame_vel2, 2));
 dopplerLog2Abs_vel2 = abs(dopplerOut_vel2);
@@ -464,12 +464,12 @@ toc
 % [lidarFlow] = geneLidarRangeVelMap(lidarData', rangeDoppler_sum, lidarRangeGrid,lidarAngleGrid, distanceCoor, velocityCoor);
 % [lidarFlow] = geneLidarRangeVelMap(lidarData', mrr_rangeDoppler_sum, lidarRangeGrid,lidarAngleGrid, distanceCoor_vel1, velocityCoor_vel1);
 %% 计算激光雷达的测距点云（使用脉宽修正方法精确测距）lidarData_frame
-fprintf('画激光点云到毫米波雷达RA图上\n');
-tic
-[pcStrc,pcPolar] = lidarRangeMeas(lidarData_frame',lineId+2);
-x = pcStrc.vertex.x(~isnan(pcStrc.vertex.x));
-y = pcStrc.vertex.y(~isnan(pcStrc.vertex.y));
-z = pcStrc.vertex.z(~isnan(pcStrc.vertex.z));
+% fprintf('画激光点云到毫米波雷达RA图上\n');
+% tic
+% [pcStrc,pcPolar] = lidarRangeMeas(lidarData_frame',lineId+2);
+% x = pcStrc.vertex.x(~isnan(pcStrc.vertex.x));
+% y = pcStrc.vertex.y(~isnan(pcStrc.vertex.y));
+% z = pcStrc.vertex.z(~isnan(pcStrc.vertex.z));
 % figure(h);subplot(4,2,1);
 % scatter3(x,y,z,4,'b','filled');view([0,0,1]);hold on
 % if ~isempty(CFAROut)
@@ -492,23 +492,28 @@ fprintf('画出music分析结果\n');
 tic
 % [rangeSpectrum,angleSpectrum] = spectrumAnalysis_0917(dataCube3dFFT);
 h=figure(2);%figureName = ['帧号：',num2str(this_frameNum)];
-subplot(2,2,1);imagesc(lidarAngleGrid,lidarRangeGrid,lidarData');
+% subplot(2,2,1);imagesc(lidarAngleGrid,lidarRangeGrid,lidarData');
+subplot(2,3,1);plot(distanceCoor,20*log10(sum(dopplerSum',1)));
+subplot(2,3,4);plot(distanceCoor_vel1,20*log10(sum(dopplerSum_vel1',1)));
+
+subplot(2,3,2);imagesc(distanceCoor_vel1,velocityCoor,dopplerSum');
+subplot(2,3,5);imagesc(distanceCoor_vel1,velocityCoor,dopplerSum_vel1');
 set(gca,'YDIR','normal');
 % subplot(3,2,1);
-subplot(2,2,3);
+subplot(2,3,3);
 % [X_usrr,Y_usrr] = meshgrid(xgrid_usrr,ygrid_usrr);
 imagesc(xgrid_usrr,ygrid_usrr,carte_RAMap);hold on
-scatter(x,y,3,'r','filled');
+% scatter(x,y,3,'r','filled');
 % mesh(X_usrr,Y_usrr,carte_RAMap);
 set(gca,'YDIR','normal');title('CFAR MUSIC srr range-angle map');
-xlim([5*min(x),5*max(x)]);ylim([0,max(y)]);
+% xlim([5*min(x),5*max(x)]);ylim([0,max(y)]);
 % subplot(3,2,2);
-subplot(2,2,4);
+subplot(2,3,6);
 % [X_mrr,Y_mrr] = meshgrid(xgrid_mrr,ygrid_mrr);
 imagesc(xgrid_mrr,ygrid_mrr,carte_RAMap_mrr);hold on
-scatter(x,y,3,'r','filled');
+% scatter(x,y,3,'r','filled');
 set(gca,'YDIR','normal');title('CFAR MUSIC mrr range-angle map');
-xlim([5*min(x),5*max(x)]);ylim([0,max(y)]);
+% xlim([5*min(x),5*max(x)]);ylim([0,max(y)]);
 toc
 vars = {'adcStart', 'adcStart_vel', 'adcStartTimeConst', 'adcStartTimeConst_vel', 'agl_grid', 'agl_grid_music', 'angle', 'angleBin_num', 'azimuthOut', 'bandwidth', 'bandwidth_vel', 'c', 'carte_RAMap', 'carte_RAMap_mrr', 'centerFreq', 'centerFreq_vel', 'CFARDopplerDomainOut', 'CFARDopplerDomainOut_vel1', 'CFAROut', 'CFAROut_vel', 'CFAROutTemp', 'CFAROutTemp_vel1', 'CFARRangeDomainOut', 'CFARRangeDomainOut_vel1', 'cfartype', 'chirpInterval', 'chirpInterval_vel1', 'chirpInterval_vel2', 'col', 'col_vel1', 'data_num', 'digOutSampleRate', 'digOutSampleRate_vel', 'distanceCoor', 'distanceCoor_vel1','distanceOut', 'distanceOut_vel', 'dopplerBin_num', 'dopplerIn', 'dopplerIn_vel1', 'dopplerIn_vel2', 'dopplerLog2Abs', 'dopplerLog2Abs_vel1', 'dopplerLog2Abs_vel2', 'dopplerOut', 'dopplerOut_vel1', 'dopplerOut_vel2', 'dopplerSum', 'dopplerSum_vel1', 'dopplerSum_vel2', 'dopplerWin', 'dopplerWin_vel', 'dopplerWindowCoeffVec', 'dopplerWindowCoeffVec_vel', 'dopplerWinLen', 'dopplerWinLen_vel', 'elevOut', 'frame_index', 'frameIndex', 'freqSlopeConst', 'freqSlopeConst_vel', 'guardLen', 'i', 'idleTimeConst', 'idleTimeConst_vel1', 'idleTimeConst_vel2', 'lidarAngleGrid', 'lidarData', 'lidarData_frame', 'lidarDataFrame', 'lidarRangeGrid', 'lineId', 'm', 'MAX_NUM_DET_PER_RANGE_GATE', 'MAX_VEL_ENH_PROCESSING', 'maxIdx', 'mmwavedata', 'mmwavedata_vel1', 'n', 'nextCnt', 'noiseDivShift', 'numADCSamples', 'numADCSamples_vel', 'numCirpsPerFrame_vel1', 'numCirpsPerFrame_vel2', 'numTarget', 'pcPolar', 'pcStrc', 'pcStrc1', 'pcStrc2', 'peakGrpingCol', 'peakGrpingCol_vel1', 'peakGrpingRow', 'peakGrpingRow_vel1', 'peakValue', 'peakValue_vel1', 'radarDataAll', 'RAMap_fromMat_cfar', 'RAMap_fromMat_cfar_mrr', 'rampEndTime', 'rampEndTime_vel', 'range', 'range_vel1', 'rangeAbs', 'rangeAbs_vel1', 'rangeOut', 'rangeOut_vel1', 'rangeOut_vel2', 'rangeWin', 'rangeWin_vel', 'RangeWindowCoeffVec', 'RangeWindowCoeffVec_vel', 'RangeWinLen', 'RangeWinLen_vel', 'row', 'row_vel1', 'RX_num', 'singleAzimuthOut', 'slope', 'slope_vel', 'startFreq', 'startFreq_vel', 'startFreqConst', 'startFreqConst_vel', 'startNum', 'this_frameNum', 'thresholdScale', 'TX_num', 'vel', 'vel1data', 'vel2data', 'vel_vel1', 'velocityCoor', 'velocityCoor_vel1', 'velocityCoor_vel2', 'velocityOut', 'velocityOut_vel', 'w', 'w1', 'winLen', 'x', 'xgrid_mrr', 'xgrid_usrr', 'y', 'ygrid_mrr', 'ygrid_usrr', 'z'};
 clear(vars{:})

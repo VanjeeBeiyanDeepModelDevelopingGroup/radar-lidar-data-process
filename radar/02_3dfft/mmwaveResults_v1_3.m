@@ -18,8 +18,8 @@
 %%%           方法选择用methodSign标志位进行区别                            %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [ distanceCoor, velocityCoor, distanceOut, velocityOut, FinalResult, mmwavedata,dopplerSum,pcStrc ] = mmwaveResults_v1_3(radarDataAll, lidarDataFrame, frameIndex, methodSign, lineId)
-% function [ distanceCoor, velocityCoor, distanceOut, velocityOut, FinalResult, mmwavedata, dopplerSum,  ] = mmwaveResults_v1_2(radarDataAll, lidarDataFrame, frameIndex)
+% function [ distanceCoor, velocityCoor, distanceOut, velocityOut, FinalResult, mmwavedata,dopplerSum,pcStrc ] = mmwaveResults_v1_3(radarDataAll, lidarDataFrame, frameIndex, methodSign, lineId)
+function [ distanceCoor, velocityCoor, distanceOut, velocityOut, FinalResult, mmwavedata,dopplerSum,pcStrc ] = mmwaveResults_v1_3(radarDataAll, frameIndex, methodSign, lineId)
 
 numADCSamples = param.numADCSamples;
 % numChirpsPerFrame = param.numChirpsPerFrame;

@@ -306,8 +306,10 @@ tic
 pcStrc1 = [];
 w = linspace(-1,1,angleBin_num); % angle_grid
 agl_grid = asin(w)*180/pi; % [-1,1]->[-pi/2,pi/2]
-w1 = linspace(-1,1,param.musicBin);
-agl_grid_music = asin(w1)*180/pi;
+% w1 = linspace(-1,1,param.musicBin);
+% agl_grid_music = asin(w1)*180/pi;
+w1 = linspace(-pi/2,pi/2,param.musicBin);
+agl_grid_music = w1*180/pi;
 [azimuthOut, elevOut] = AOA2_v1_3(dopplerOut, CFAROut, TX_num, RX_num, dopplerBin_num, angleBin_num, MAX_VEL_ENH_PROCESSING);
 % hh=figure;
 [numTarget,~] = size(CFAROut);

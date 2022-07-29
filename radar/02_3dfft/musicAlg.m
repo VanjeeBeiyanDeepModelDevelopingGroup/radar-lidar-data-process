@@ -19,7 +19,8 @@ X = signal*signal';% '这是共轭转置
 Qn = eigVec(:,1:M-1);
 %% 扫描所有角度，计算谱分析结果
 antennaArr = linspace(0,(N-1)*d,N)';
-scanAngle = linspace(-pi/2,pi/2,L)';
+% scanAngle = linspace(-pi/2,pi/2,L)';
+scanAngle = linspace(pi/2,-pi/2,L)';
 powerSpectrumInSpace = zeros(1,L);
 for i =1:L
     av = array_response_vector(antennaArr,scanAngle(i));
