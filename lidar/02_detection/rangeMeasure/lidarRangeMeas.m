@@ -5,15 +5,20 @@ function [pcStrc,allMiuSig] = lidarRangeMeas(lidarData,line_id)
 global area_cor_form4
 global x_cfd_cor_form4
 %% 输入数据处理
-angle = (lidarData(1,:)*256+lidarData(2,:))*0.01;
+angle = (lidarData(1,:)*256+lidarData(2,:))*0.01+2;
 lidarData = lidarData(4:end,:)-127;
 %% 进行修正
 [ads,angles] = size(lidarData); % ADnum*angles
+<<<<<<< HEAD
 % <<<<<<< HEAD
 % t_offset = 0.4546;
 t_offset = 11.5226;
 % =======
 % t_offset = 11.5226;
+=======
+% t_offset = 11.5226-2.0959/0.15;%车载数据的距离对齐参数 
+t_offset = 10.5;
+>>>>>>> b724d45e672506a0bb181b4e569a89bdfe779051
 % t_offset = 0;
 % >>>>>>> 0ddd06f38478382d6bb7885d3553995dd4b8069f
 zeropoint = 2*ones(1,angles);

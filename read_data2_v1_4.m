@@ -297,9 +297,14 @@ global x_cfd_cor_form4
 %                 size(vel2data)
             end
             %% 读取视频
-            frame_index = floor((i - 1) / 2) * 5 + 2 + rem(i, 2);
+%             frame_index = floor((i - 1) / 2) * 5 + 2 + rem(i, 2);
+%             frame_index = (i-1)*3+1;
+            frame_index = floor((i - 1) / 2) * 5-30;
             frame = read(vid, frame_index);
-            figure(2);subplot(2,2,2);imshow(frame);
+            h=figure(2);figureName = ['帧号：',num2str(i)];
+            set(h,'name',figureName,'Numbertitle','off') 
+            subplot(3,2,2);imshow(frame);title(num2str(frame_index));
+%             figure(3);subplot(3,1,2);imshow(frame);
             %% 数据处理
             linNum=1;
             if linNum > 1
@@ -351,7 +356,7 @@ global x_cfd_cor_form4
 %                                 [~] = dataCubeProcess(radarDataAll, vel1data, vel2data,lidarDataFrame_singL, num2str(i),lineId);
                             case 'apply'
 %                                 [ distanceCoor_vel, velocityCoor1,velocityCoor2,distanceCoor,velocityCoor, distance, velocity, CFAROut, mmwavedata,dopplerSum, dopplerSum1,dopplerSum2,pcStrc ] = mmwaveResults_urrsrrNormal_applied(radarDataAll, vel1data, vel2data,lidarDataFrame_singL, num2str(1),lineId);
-                                mmwaveResults_urrsrrNormal_applied(radarDataAll, vel1data, vel2data,lidarDataFrame_singL, num2str(1),lineId);
+                                mmwaveResults_urrsrrNormal_applied(radarDataAll, vel1data, vel2data,lidarDataFrame_singL, num2str(1),lineId,frame_index);
 %                                 startNum = 40;
 %                                 lidarAngleGrid = (lidarData_frame(1:end-4,1)*256+lidarData_frame(1:end-4,2))/100-90;
 %                                 lidarData = lidarData_frame(1:end-4,startNum:end);

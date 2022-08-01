@@ -13,6 +13,9 @@ Detect = [];
 numOfDet = 0;
 if wrapMode == 0    %%% disabled warpped mode
     for i = 1:Xlength
+%         if i > 100
+%             fprintf('hello world!\n');
+%         end
         if i < trainWin+guardLen+1  %%% one-sided comparision for left section
             noise_estimate = sum(Xcube(i+guardLen+1:i+guardLen+trainWin))/trainWin;
 %             noise_estimate = pow2db(noise_estimate);

@@ -1,8 +1,9 @@
 % 取range下的slow_time*channel矩阵输入music算法计算angle谱响应
 % 特点：遍历按range列排序后的cfar结果，构造channel*slow time的matrix进行music谱估计
-function [ spectrumAngle ] = AOA2_v1_9( dopplerOut, cfarOut, TX_num, RX_num, numADCSamples, dopplerBin_num)
+function [ spectrumAngle, pointRAarr ] = AOA2_v1_9( dopplerOut, cfarOut, TX_num, RX_num, numADCSamples, dopplerBin_num)
     if isempty(cfarOut)
         spectrumAngle = [];
+        pointRAarr = zeros(numADCSamples,1);
         return
     end
     % angleBin_num 输入真实天线个数
@@ -14,6 +15,8 @@ function [ spectrumAngle ] = AOA2_v1_9( dopplerOut, cfarOut, TX_num, RX_num, num
     end
     dopplerOut3d = zeros(numADCSamples, dopplerBin_num,angleNum);
     spectrumAngle = zeros(numADCSamples,L);
+    % 保存目标点
+    pointRAarr = zeros(numADCSamples,1);
     signalMat = [];
     lastRangeIndx = cfarOut(1,1); 
     for r = 1: length(cfarOut(:,1))
@@ -24,7 +27,11 @@ function [ spectrumAngle ] = AOA2_v1_9( dopplerOut, cfarOut, TX_num, RX_num, num
          if rangeIndx == lastRangeIndx
              signalMat = [signalMat,channelSignal'];
          else
-             spectrumAngle(rangeIndx,:) = musicAlg(signalMat,L);
+             temp = musicAlg(signalMat,L);
+             spectrumAngle(rangeIndx,:) = temp;
+             % 角度最大值
+             [angleMax, angleIndx] = max(temp);
+             pointRAarr(rangeIndx,1) = angleIndx;
              signalMat = [];
              signalMat = [signalMat,channelSignal'];
          end

@@ -28,7 +28,7 @@ for j=1:s
     %         [max_data,max_index]=max(data(i+2:end,j));  %% i+2为找下一重回波的起始位置
     %         max_index=max_index+i+2-1;
     %     end
-    if max_data>20 && ~isnan(t_data(j))
+    if max_data>5 && ~isnan(t_data(j))
         try
             [area_data(j),wide_data(j)]=area_amend_904(data(:,j),max_index);
         catch
