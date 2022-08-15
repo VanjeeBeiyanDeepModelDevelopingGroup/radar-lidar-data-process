@@ -16,7 +16,7 @@
 %
 %
 close all
-clear all
+% clear all
 c = 3e8; % m/s
 setup_filename = './data/0809/setup.json';
 radar_cube_struct = rawDataReader(setup_filename, 'temp_raw_bin.bin', 'temp_cube', 0);
@@ -39,12 +39,13 @@ for frame_number=1:radar_cube_struct.dim.numFrames
     vel_coor = (-chirps/2:chirps/2)*radar_cube_struct.rfParams.dopplerResolutionMps;
     angle_reso=180;
     angle_coor = -angle_reso/2:angle_reso/2-1;
+    angle_coor_fft = asin((-90:1:90-1)/90)/pi*180;
 %     %% 天线通道相位校准
-%     load attena_calib_vec.mat
-%     load attena_calib_ref.mat
-%     attena_calib_vec_norm = attena_calib_ref./attena_calib_vec;
-%     attena_calib_mat = repmat(attena_calib_vec_norm,[radar_cube_struct.rfParams.numDopplerBins,1,radar_cube_struct.rfParams.numRangeBins]);
-%     radar_cube_all = radar_cube_all.*attena_calib_mat;
+    load attena_calib_vec.mat
+    load attena_calib_ref.mat
+    attena_calib_vec_norm = attena_calib_ref./attena_calib_vec;
+    attena_calib_mat = repmat(attena_calib_vec_norm,[radar_cube_struct.rfParams.numDopplerBins,1,radar_cube_struct.rfParams.numRangeBins]);
+    radar_cube_all = radar_cube_all.*attena_calib_mat;
 
     %% range fft
     subplot(2,3,[1,2]);
@@ -129,7 +130,7 @@ for frame_number=1:radar_cube_struct.dim.numFrames
         range_list = [range_list, range];
         %% fft aoa result
         [max_aoa_val_fft,max_aoa_index_fft] = max(AOA_heatmap_fft(range_index,:));
-        angle_fft = angle_coor(max_aoa_index_fft);
+        angle_fft = angle_coor_fft(max_aoa_index_fft);
         angle_list_fft = [angle_list_fft, angle_fft];
         x_fft = [x_fft, range*sin(angle_fft*pi/180)];
         y_fft = [y_fft, range*cos(angle_fft*pi/180)];

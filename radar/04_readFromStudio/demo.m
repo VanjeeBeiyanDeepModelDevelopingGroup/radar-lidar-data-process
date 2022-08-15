@@ -15,12 +15,12 @@
 close all
 clear all
 c = 3e8; % m/s
-setup_filename = './data/0805_angle/setup.json';
+setup_filename = './data/0809/setup.json';
 radar_cube_struct = rawDataReader(setup_filename, 'temp_raw_bin.bin', 'temp_cube', 0);
 %% 可调参数
 range_cfar_thresh = 0.25;
 doppler_cfar_thresh = 0.1;
-frame_number = 3;
+frame_number = 1;
 custome_peak_indx = 1;  % 调整这个值选取第几个峰为目标峰
 %% 开始
 frame = radar_cube_struct.data{frame_number};
@@ -34,6 +34,7 @@ range_coor = c/(2*radar_cube_struct.rfParams.bandwidth*1e9)*(0:range_all_indx-1)
 vel_coor = (-chirps/2:chirps/2)*radar_cube_struct.rfParams.dopplerResolutionMps;
 angle_reso=180;
 angle_coor = -angle_reso/2:angle_reso/2-1;
+angle_coor_fft = asin((-90:1:90-1)/90)/pi*180;
 %% 天线通道相位校准
 load attena_calib_vec.mat
 load attena_calib_ref.mat
@@ -125,7 +126,9 @@ AOA_heatmap_fft = squeeze(20*log10(sum(abs(fft(new_radar_cube_all,[],2)),1)));
 AOA_heatmap_fft = fliplr(AOA_heatmap_fft');
 figure(3);
 subplot(1,2,1);
-imagesc(angle_coor, range_coor, AOA_heatmap_fft);
+[Angle_coor_fft, Range_coor] = meshgrid(angle_coor_fft, range_coor);
+mesh(Angle_coor_fft, Range_coor,AOA_heatmap_fft);view([0,0,1]);
+% imagesc(angle_coor_fft, range_coor, AOA_heatmap_fft(1:end,:));
 set(gca,'YDir','normal');
 hold on;
 subplot(1,2,2);
@@ -139,8 +142,8 @@ range_val = range_coor(custome_peak_indx);
 % fft
 angle_spectrum_fft = AOA_heatmap_fft(custome_peak_indx,:);
 [max_val,max_angle_index_fft] = max(angle_spectrum_fft);
-max_angle_fft = angle_coor(max_angle_index_fft);
-subplot(1,2,1);plot(max_angle_fft,range_val,'ro');
+max_angle_fft = angle_coor_fft(max_angle_index_fft);
+subplot(1,2,1);plot3(max_angle_fft,range_val,max_val,'ro');
 % music
 angle_spectrum = AOA_heatmap(custome_peak_indx,:);
 [max_val,max_angle_index] = max(angle_spectrum);
@@ -185,32 +188,19 @@ subplot(1,2,2);plot(max_angle,range_val,'ro');
 % end
 
 %% 静态误差曲线
-% gt_angle = [-45,-30:5:-5,5:5:30];
-% fft_angle = [-44,-46,-46,-47,-49,-50,89,89,87,87,46,45,44];
-% music_angle = [-32,-30,-30,-30,-2,-1,1,1,1,1,28,29,29];
-% figure(4);
-% subplot(2,1,1);
-% plot(gt_angle,gt_angle,'ro-');hold on
-% plot(gt_angle,fft_angle,'go-');hold on
-% plot(gt_angle,music_angle,'bo-');hold on
-% legend('gt','fft','music');
-% subplot(2,1,2);
-% % plot(fft_angle-gt_angle,'go-');hold on
-% plot(gt_angle,music_angle-gt_angle,'bo-');hold on
-% legend('music');
-% 画位置图
 gt_range = 5;
 radar_range = 4.92;
-gt_angles = [-45,-30:5:-5,5:5:30];
-% fft_angles = [-44,-46,-46,-47,-49,-50,89,89,87,87,46,45,44];
-% music_angles = [-32,-30,-30,-30,-2,-1,1,1,1,1,28,29,29];
-
-fft_angles = [-44,-45,-46,-47,-89,-90,89,89,87,87,46,45,44];
-music_angles = [-32,-31,-30,-30,-2,-1,0,0,1,1,28,29,29];
-% data from TI
-% gt_angles = [+45,+40,+35,+30,+25,+20,+15,+10,+5,-5,-10,-15,-20,-25,-30,-35,-40,-45];
-% music_angles = [+60.5,+59.5,+20,+19.67,+19.75,+11,+11,+10.5,+7,+2,-3.833,-9.5,-8.25,-5.75,-41,-39.333,-53.5,-52];
-
+gt_angles = [-45,-30:5:30];
+fft_angles = [-29.26,-30.73,-31.48,-32.23,-81.45,-90.0,-81.45,81.45,77.89,75.16	30.73,29.26,30.0,29.26];
+music_angles = [-32,-31,-30,-29,-2,-1,-1,0,0,1,28,29,29,30];
+% 画误差曲线
+figure(4);
+% subplot(2,1,1);
+plot(gt_angles,gt_angles,'ro-');hold on
+plot(gt_angles,fft_angles,'go-');hold on
+plot(gt_angles,music_angles,'bo-');hold on
+legend('gt','fft','music');
+% 画点分布位置图
 figure(5);
 for i = 1:length(gt_angles)
     gt_angle = gt_angles(i);
@@ -224,5 +214,5 @@ for i = 1:length(gt_angles)
     plot(music_pos(1), music_pos(2),'bo');hold on
 end
 legend('ground truth','fft','music');
-% legend('ground truth','music');
+% % legend('ground truth','music');
 hold off;
