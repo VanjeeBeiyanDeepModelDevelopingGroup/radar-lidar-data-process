@@ -25,14 +25,27 @@ range_cfar_thresh = 0.1;
 doppler_cfar_thresh = 0.05;
 frame_number = 3;
 custome_peak_indx = 1;  % 调整这个值选取第几个峰为目标峰
+MIMO = 1;
+SKIP_read = 0;
 %% 开始
 figure(1);
 for frame_number=1:radar_cube_struct.dim.numFrames
     frame = radar_cube_struct.data{frame_number};
-    radar_cube_tx1 = frame(1:3:end,:,:);
-    radar_cube_tx2 = frame(2:3:end,:,:);
-    radar_cube_tx3 = frame(3:3:end,:,:);
-    radar_cube_all = cat(2,radar_cube_tx1, radar_cube_tx2, radar_cube_tx3);
+    if(MIMO)
+        if(SKIP_read)
+            radar_cube_tx1 = frame(1:3:end,:,:);
+            radar_cube_tx2 = frame(2:3:end,:,:);
+            radar_cube_tx3 = frame(3:3:end,:,:);
+            radar_cube_all = cat(2,radar_cube_tx1, radar_cube_tx2, radar_cube_tx3);
+        else
+            radar_cube_tx1 = frame(1:128,:,:);
+            radar_cube_tx2 = frame(129:256,:,:);
+            radar_cube_tx3 = frame(257:end,:,:);
+            radar_cube_all = cat(2,radar_cube_tx1, radar_cube_tx2, radar_cube_tx3);
+        end
+    else
+        radar_cube_all = frame;
+    end
 
     [chirps,atennas,range_all_indx] = size(radar_cube_all);
     range_coor = c/(2*radar_cube_struct.rfParams.bandwidth*1e9)*(0:range_all_indx-1);
@@ -158,6 +171,9 @@ for frame_number=1:radar_cube_struct.dim.numFrames
     scatter(angle_list_fft, range_list,'b','filled');hold on;
     scatter(angle_list_music, range_list,'g','filled');hold on;
     legend('fft','music');
+    if frame_number >67
+        continue;
+    end
     pause(0.01);
     clf(figure(1));
 
