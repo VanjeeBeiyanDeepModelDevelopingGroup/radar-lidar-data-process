@@ -12,7 +12,7 @@
 close all
 clear all
 c = 3e8; % m/s
-setup_filename = './data/0905_TI外场/配置/MIMO_TX0&TX2/1.setup.json';
+setup_filename = './data/0923_高级仪器测试/studio配置/1.setup.json';
 radar_cube_struct = rawDataReader(setup_filename, 'temp_raw_bin.bin', 'temp_cube', 0);
 %% 可调参数
 range_cfar_thresh = 0.02;
@@ -21,7 +21,7 @@ frame_number = 1;
 custome_peak_indx = 1;  % 调整这个值选取第几个峰为目标峰
 MIMO = 1;
 SKIP_read = 1;
-MIMO_2attena = 1;
+MIMO_2attena = 1;   % 仅仅使用TX0&TX2
 %% 组包数据
 frame = radar_cube_struct.data{frame_number};
 if(MIMO)
@@ -57,7 +57,12 @@ range_coor = c/(2*radar_cube_struct.rfParams.bandwidth*1e9)*(0:range_all_indx-1)
 
 
 % do range doppler in each chirp*range curve
+% do doppler fft
+radar_cube_all = fftshift(fft(radar_cube_all,[],1),1);
+% radar_cube_all = fft(radar_cube_all,[],1);
 range_doppler_img = squeeze(sum(abs(radar_cube_all),2));
+vel_coor = (-chirps/2:chirps/2)*radar_cube_struct.rfParams.dopplerResolutionMps;
+figure(10);imagesc(range_coor,vel_coor,log2(range_doppler_img));set(gca,'YDir','normal');
 bi_rangefft = zeros(1,256);
 % 如果不把所有的chirp都sum起来，就这样操作
 % for i=1:radar_cube_struct.rfParams.numDopplerBins
